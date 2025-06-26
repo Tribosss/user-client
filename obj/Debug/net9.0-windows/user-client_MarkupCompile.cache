@@ -1,5 +1,5 @@
 ﻿user-client
-1.0.0.0
+
 
 winexe
 C#
@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET9_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Users\rugat\Documents\koreait\projects\intranet\user-client\App.xaml
-21183532036
+1-487866684
 
-7-1401131619
+41775565297
 200-56570838
-View\LoginWindow.xaml;View\MainWindow.xaml;
+View\MainWindow.xaml;
 
 False
 
