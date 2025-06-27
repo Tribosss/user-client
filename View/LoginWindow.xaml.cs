@@ -1,6 +1,7 @@
 ﻿using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Windows;
 
@@ -11,17 +12,17 @@ namespace user_client.View
     /// </summary>
     public partial class LoginWindow : Window
     {
-        private string[] keywords = [
+        private readonly string[] keywords = [
             "HelloWorld",
             "Hello",
-            "YES",
+            "yessss",
         ];
 
         public LoginWindow()
         {
             InitializeComponent();
 
-            var device = LibPcapLiveDeviceList.Instance[4];
+            var device = LibPcapLiveDeviceList.Instance[6];
             Console.WriteLine(device.ToString());
             device.Open();
             device.OnPacketArrival += Device_OnPacketArrival;
@@ -30,6 +31,7 @@ namespace user_client.View
 
         void Device_OnPacketArrival(object s, PacketCapture e)
         {
+            byte[]? payload = null;
             byte[] rawBytes = e.GetPacket().Data;
             Packet packet = Packet.ParsePacket(e.GetPacket().LinkLayerType, rawBytes);
 
@@ -37,21 +39,26 @@ namespace user_client.View
             if (ether == null) return;
             IPPacket? ip = packet.Extract<IPPacket>();
             if (ip == null) return;
-            TcpPacket? tcp = packet.Extract<TcpPacket>();
-            if (tcp == null) return;
 
-            byte[] payload = tcp.PayloadData;
+            switch (ip.Protocol) {
+                case ProtocolType.Udp:
+                    {
+                        payload = packet.Extract<UdpPacket>().PayloadData;
+                        Console.WriteLine($"Captured: {ip.SourceAddress}:{packet.Extract<UdpPacket>().SourcePort} → {ip.DestinationAddress}:{packet.Extract<UdpPacket>().DestinationPort}");
+                        break;
+                    }
+                case ProtocolType.Tcp: payload = packet.Extract<TcpPacket>().PayloadData; break;
+            }
             if (payload == null || payload.Length <= 0) return;
-
-            string text = Encoding.ASCII.GetString(rawBytes);
+            string text = Encoding.ASCII.GetString(payload);
 
             foreach (string keyword in keywords)
             {
                 if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
 
+                Console.WriteLine("======================");
                 Console.WriteLine($"Detected Keyword: {keyword}");
                 Console.WriteLine(text);
-                Console.WriteLine("======================");
                 break;
             }
         }
