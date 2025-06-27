@@ -3,12 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\view\\loginwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|solutionrelative:view\\loginwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\view\\boardlistwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|solutionrelative:view\\boardlistwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|solutionrelative:app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\view\\boardlistwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|solutionrelative:view\\boardlistwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\view\\loginwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|solutionrelative:view\\loginwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\model\\post.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|solutionrelative:model\\post.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -20,18 +32,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|solutionrelative:assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\view\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|solutionrelative:view\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\view\\loginwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|solutionrelative:view\\loginwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|c:\\users\\rugat\\documents\\koreait\\projects\\intranet\\user-client\\view\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}|user-client.csproj|solutionrelative:view\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -41,11 +41,48 @@
       "DocumentGroups": [
         {
           "DockedWidth": 287,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
+              "Title": "BoardListWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\BoardListWindow.xaml.cs",
+              "RelativeDocumentMoniker": "View\\BoardListWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\BoardListWindow.xaml.cs",
+              "RelativeToolTip": "View\\BoardListWindow.xaml.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAACcAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-27T14:32:03.647Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "BoardListWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\BoardListWindow.xaml",
+              "RelativeDocumentMoniker": "View\\BoardListWindow.xaml",
+              "ToolTip": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\BoardListWindow.xaml",
+              "RelativeToolTip": "View\\BoardListWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-06-27T14:31:43.17Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Post.cs",
+              "DocumentMoniker": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\Model\\Post.cs",
+              "RelativeDocumentMoniker": "Model\\Post.cs",
+              "ToolTip": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\Model\\Post.cs",
+              "RelativeToolTip": "Model\\Post.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-27T14:20:25.086Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "ResourcePart.cs",
               "DocumentMoniker": "C:\\Users\\rugat\\AppData\\Local\\Temp\\.vsdbgsrc\\b49ace08f4cd26a4f275d628999a0f91ccb8a1892704530d9e6f5bd1284082f1\\ResourcePart.cs",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\b49ace08f4cd26a4f275d628999a0f91ccb8a1892704530d9e6f5bd1284082f1\\ResourcePart.cs",
@@ -58,20 +95,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "LoginWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\LoginWindow.xaml.cs",
               "RelativeDocumentMoniker": "View\\LoginWindow.xaml.cs",
               "ToolTip": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\LoginWindow.xaml.cs",
               "RelativeToolTip": "View\\LoginWindow.xaml.cs",
-              "ViewState": "AgIAAB4AAAAAAAAAAAA1wCwAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-27T11:37:18.534Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
               "Title": "App.xaml.cs",
               "DocumentMoniker": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\App.xaml.cs",
               "RelativeDocumentMoniker": "App.xaml.cs",
@@ -79,8 +116,7 @@
               "RelativeToolTip": "App.xaml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-27T11:37:34.844Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-27T11:37:34.844Z"
             },
             {
               "$type": "Document",
@@ -96,7 +132,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 7,
               "Title": "AssemblyInfo.cs",
               "DocumentMoniker": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\AssemblyInfo.cs",
               "RelativeDocumentMoniker": "AssemblyInfo.cs",
@@ -105,40 +141,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-06-27T11:37:21.082Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "View\\MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\MainWindow.xaml.cs",
-              "RelativeToolTip": "View\\MainWindow.xaml.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-27T11:36:38.39Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "LoginWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\LoginWindow.xaml",
-              "RelativeDocumentMoniker": "View\\LoginWindow.xaml",
-              "ToolTip": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\LoginWindow.xaml",
-              "RelativeToolTip": "View\\LoginWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-06-26T07:12:56.298Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\MainWindow.xaml",
-              "RelativeDocumentMoniker": "View\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\rugat\\Documents\\koreait\\projects\\intranet\\user-client\\View\\MainWindow.xaml",
-              "RelativeToolTip": "View\\MainWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-06-26T07:12:26.924Z"
             }
           ]
         }
