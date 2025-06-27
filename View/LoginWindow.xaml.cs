@@ -22,6 +22,8 @@ namespace user_client.View
         public LoginWindow()
         {
             InitializeComponent();
+
+
         }
     }
 }
