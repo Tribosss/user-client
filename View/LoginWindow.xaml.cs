@@ -1,18 +1,15 @@
 ﻿using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
-using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Windows;
 
 namespace user_client.View
 {
-    /// <summary>
-    /// Interaction logic for LoginWindow.xaml
-    /// </summary>
     public partial class LoginWindow : Window
     {
-        private readonly string[] keywords = [
+        // 임시 키워드
+        private readonly string[] _keywords = [
             "HelloWorld",
             "Hello",
             "yessss",
@@ -21,7 +18,11 @@ namespace user_client.View
         public LoginWindow()
         {
             InitializeComponent();
-
+            
+            // initalize Tray
+            InitTray();
+            
+            // Device Select & Open
             var device = LibPcapLiveDeviceList.Instance[6];
             Console.WriteLine(device.ToString());
             device.Open();
@@ -32,27 +33,31 @@ namespace user_client.View
         void Device_OnPacketArrival(object s, PacketCapture e)
         {
             byte[]? payload = null;
+            string text;
             byte[] rawBytes = e.GetPacket().Data;
-            Packet packet = Packet.ParsePacket(e.GetPacket().LinkLayerType, rawBytes);
-
+            LinkLayers linkLayerType = e.GetPacket().LinkLayerType;
+            
+            // 패킷 파싱
+            Packet packet = Packet.ParsePacket(linkLayerType, rawBytes);
             EthernetPacket? ether = packet.Extract<EthernetPacket>();
             if (ether == null) return;
             IPPacket? ip = packet.Extract<IPPacket>();
             if (ip == null) return;
-
+            // TCP/UDP 분류
             switch (ip.Protocol) {
                 case ProtocolType.Udp:
                     {
                         payload = packet.Extract<UdpPacket>().PayloadData;
-                        Console.WriteLine($"Captured: {ip.SourceAddress}:{packet.Extract<UdpPacket>().SourcePort} → {ip.DestinationAddress}:{packet.Extract<UdpPacket>().DestinationPort}");
                         break;
                     }
                 case ProtocolType.Tcp: payload = packet.Extract<TcpPacket>().PayloadData; break;
             }
+            // payload 추출
             if (payload == null || payload.Length <= 0) return;
-            string text = Encoding.ASCII.GetString(payload);
+            text = Encoding.ASCII.GetString(payload);
 
-            foreach (string keyword in keywords)
+            // 키워드 탐지
+            foreach (string keyword in _keywords)
             {
                 if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
 
@@ -61,6 +66,32 @@ namespace user_client.View
                 Console.WriteLine(text);
                 break;
             }
+        }
+
+        private void InitTray()
+        {
+            // 트레이 초기 설정
+            NotifyIcon tray = new NotifyIcon();
+            tray.Icon = Properties.Resources.TribTrayIcon;
+            tray.Visible = true;
+            tray.Text = "Tribosss";
+
+            // 최소화 시 작업표시줄 숨김 & 트레이 표시
+            this.StateChanged += (s, e) =>
+            {
+                if (this.WindowState != WindowState.Minimized) return;
+                this.Hide();
+                this.ShowInTaskbar = false;
+            };
+
+            // 트레이 더블클릭 시 작업표시줄 표시 & 트레이 숨김
+            tray.DoubleClick += delegate (object? s, EventArgs e)
+            {
+                this.Show();
+                this.WindowState = WindowState.Normal;
+                this.ShowInTaskbar = true;
+                tray.Visible = false;
+            };
         }
     }
 }
