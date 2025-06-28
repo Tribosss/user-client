@@ -20,6 +20,8 @@ namespace user_client.View
 
         public LoginWindow()
         {
+            this.Hide();
+            SetTrayIcon();
             InitializeComponent();
 
             var device = LibPcapLiveDeviceList.Instance[6];
@@ -61,6 +63,11 @@ namespace user_client.View
                 Console.WriteLine(text);
                 break;
             }
+        }
+
+        private void SetTrayIcon()
+        {
+
         }
     }
 }
