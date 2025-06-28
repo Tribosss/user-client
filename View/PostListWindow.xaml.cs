@@ -14,6 +14,7 @@ namespace user_client.View
     /// </summary>
     public partial class BoardListWindow : Window
     {
+        private PostWindow postWindowInstance = null;
         // 게시글 데이터 컬렉션
         public ObservableCollection<Post> Posts { get; set; }
         public BoardListWindow()
@@ -31,6 +32,26 @@ namespace user_client.View
 
             // DataGrid에 데이터 바인딩
             PostGrid.ItemsSource = Posts;
+        }
+        private void PostGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            // 선택한 행의 데이터 가져오기
+            var selectedPost = PostGrid.SelectedItem as Post;
+            if (selectedPost == null)
+                return;
+
+            // 기존 창이 이미 열려 있는지 확인
+            if (postWindowInstance == null || !postWindowInstance.IsLoaded)
+            {
+                postWindowInstance = new PostWindow();
+            }
+
+            // 기존 창을 활성화
+            postWindowInstance.Show();
+            postWindowInstance.Activate();
+
+            // 데이터를 창에 전달
+            postWindowInstance.SetPostDetails(selectedPost);
         }
     }
 }
