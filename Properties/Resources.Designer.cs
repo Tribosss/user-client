@@ -61,12 +61,22 @@ namespace user_client.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static byte[] trayIcon {
+        internal static System.Drawing.Icon TestIcon {
             get {
-                object obj = ResourceManager.GetObject("trayIcon", resourceCulture);
-                return ((byte[])(obj));
+                object obj = ResourceManager.GetObject("TestIcon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon TribTrayIcon {
+            get {
+                object obj = ResourceManager.GetObject("TribTrayIcon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
             }
         }
     }

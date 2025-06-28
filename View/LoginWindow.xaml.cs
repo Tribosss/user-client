@@ -1,28 +1,26 @@
 ﻿using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
-using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Windows;
+//using System.Windows.Forms;
 
 namespace user_client.View
 {
-    /// <summary>
-    /// Interaction logic for LoginWindow.xaml
-    /// </summary>
     public partial class LoginWindow : Window
     {
-        private readonly string[] keywords = [
+        private readonly string[] _keywords = [
             "HelloWorld",
             "Hello",
             "yessss",
         ];
+        NotifyIcon _trayIcon = new NotifyIcon();
 
         public LoginWindow()
         {
-            this.Hide();
-            SetTrayIcon();
             InitializeComponent();
+
+            SetTray();
 
             var device = LibPcapLiveDeviceList.Instance[6];
             Console.WriteLine(device.ToString());
@@ -46,7 +44,6 @@ namespace user_client.View
                 case ProtocolType.Udp:
                     {
                         payload = packet.Extract<UdpPacket>().PayloadData;
-                        Console.WriteLine($"Captured: {ip.SourceAddress}:{packet.Extract<UdpPacket>().SourcePort} → {ip.DestinationAddress}:{packet.Extract<UdpPacket>().DestinationPort}");
                         break;
                     }
                 case ProtocolType.Tcp: payload = packet.Extract<TcpPacket>().PayloadData; break;
@@ -54,7 +51,7 @@ namespace user_client.View
             if (payload == null || payload.Length <= 0) return;
             string text = Encoding.ASCII.GetString(payload);
 
-            foreach (string keyword in keywords)
+            foreach (string keyword in _keywords)
             {
                 if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
 
@@ -65,9 +62,11 @@ namespace user_client.View
             }
         }
 
-        private void SetTrayIcon()
+        private void SetTray()
         {
-
+            _trayIcon = new NotifyIcon();
+            _trayIcon.Visible = true;
+            _trayIcon.Icon = Properties.Resources.TestIcon;
         }
     }
 }
