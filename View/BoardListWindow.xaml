@@ -7,6 +7,8 @@
         mc:Ignorable="d"
         Title="BoardListWindow" Height="450" Width="800">
     <Grid>
+        <Frame Name="frame"
+               NavigationUIVisibility="Hidden" />
         <Button Content="👤" Margin="730,27,20,357" Height="30" Width="30" FontSize="18"/>
         <TextBlock Text="전체 글 보기" FontSize="20" FontWeight="Bold"
                    Margin="50,80,0,0" />
@@ -14,7 +16,8 @@
                    Margin="50,120,0,0" />
         <DataGrid Name="PostGrid" Margin="50,144,30,24" AutoGenerateColumns="False"
           Background="White"
-          HeadersVisibility="Column" BorderThickness="0" GridLinesVisibility="None">
+          HeadersVisibility="Column" BorderThickness="0" GridLinesVisibility="None" 
+          MouseDoubleClick="PostGrid_MouseDoubleClick">
 
             <!-- 열 정의 -->
             <DataGrid.Columns>
