@@ -14,12 +14,10 @@ namespace user_client.View
             "Hello",
             "yessss",
         ];
-        NotifyIcon _trayIcon = new NotifyIcon();
 
         public LoginWindow()
         {
             InitializeComponent();
-
             SetTray();
 
             var device = LibPcapLiveDeviceList.Instance[6];
@@ -64,9 +62,25 @@ namespace user_client.View
 
         private void SetTray()
         {
-            _trayIcon = new NotifyIcon();
-            _trayIcon.Visible = true;
-            _trayIcon.Icon = Properties.Resources.TestIcon;
+            NotifyIcon tray = new NotifyIcon();
+            tray.Icon = Properties.Resources.TribTrayIcon;
+            tray.Visible = true;
+            tray.Text = "Tribosss";
+
+            this.StateChanged += (s, e) =>
+            {
+                if (this.WindowState != WindowState.Minimized) return;
+                this.Hide();
+                this.ShowInTaskbar = false;
+            };
+
+            tray.DoubleClick += delegate (object s, EventArgs e)
+            {
+                this.Show();
+                this.WindowState = WindowState.Normal;
+                this.ShowInTaskbar = true;
+                tray.Visible = false;
+            };
         }
     }
 }
