@@ -19,10 +19,10 @@ namespace user_client.View
         {
             InitializeComponent();
             
-            // initalize Tray
+            // 트레이 초기화
             InitTray();
             
-            // Device Select & Open
+            // 디바이스 선택 및 열기
             var device = LibPcapLiveDeviceList.Instance[6];
             Console.WriteLine(device.ToString());
             device.Open();
