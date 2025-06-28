@@ -6,13 +6,15 @@ using System.Windows;
 
 namespace user_client.View
 {
+    /// <summary>
+    /// Interaction logic for LoginWindow.xaml
+    /// </summary>
     public partial class LoginWindow : Window
     {
-        // 임시 키워드
-        private readonly string[] _keywords = [
+        private string[] keywords = [
             "HelloWorld",
             "Hello",
-            "yessss",
+            "YES",
         ];
 
         public LoginWindow()
@@ -32,66 +34,30 @@ namespace user_client.View
 
         void Device_OnPacketArrival(object s, PacketCapture e)
         {
-            byte[]? payload = null;
-            string text;
             byte[] rawBytes = e.GetPacket().Data;
-            LinkLayers linkLayerType = e.GetPacket().LinkLayerType;
-            
-            // 패킷 파싱
-            Packet packet = Packet.ParsePacket(linkLayerType, rawBytes);
+            Packet packet = Packet.ParsePacket(e.GetPacket().LinkLayerType, rawBytes);
+
             EthernetPacket? ether = packet.Extract<EthernetPacket>();
             if (ether == null) return;
             IPPacket? ip = packet.Extract<IPPacket>();
             if (ip == null) return;
-            // TCP/UDP 분류
-            switch (ip.Protocol) {
-                case ProtocolType.Udp:
-                    {
-                        payload = packet.Extract<UdpPacket>().PayloadData;
-                        break;
-                    }
-                case ProtocolType.Tcp: payload = packet.Extract<TcpPacket>().PayloadData; break;
-            }
-            // payload 추출
-            if (payload == null || payload.Length <= 0) return;
-            text = Encoding.ASCII.GetString(payload);
+            TcpPacket? tcp = packet.Extract<TcpPacket>();
+            if (tcp == null) return;
 
-            // 키워드 탐지
-            foreach (string keyword in _keywords)
+            byte[] payload = tcp.PayloadData;
+            if (payload == null || payload.Length <= 0) return;
+
+            string text = Encoding.ASCII.GetString(rawBytes);
+
+            foreach (string keyword in keywords)
             {
                 if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
 
-                Console.WriteLine("======================");
                 Console.WriteLine($"Detected Keyword: {keyword}");
                 Console.WriteLine(text);
+                Console.WriteLine("======================");
                 break;
             }
-        }
-
-        private void InitTray()
-        {
-            // 트레이 초기 설정
-            NotifyIcon tray = new NotifyIcon();
-            tray.Icon = Properties.Resources.TribTrayIcon;
-            tray.Visible = true;
-            tray.Text = "Tribosss";
-
-            // 최소화 시 작업표시줄 숨김 & 트레이 표시
-            this.StateChanged += (s, e) =>
-            {
-                if (this.WindowState != WindowState.Minimized) return;
-                this.Hide();
-                this.ShowInTaskbar = false;
-            };
-
-            // 트레이 더블클릭 시 작업표시줄 표시 & 트레이 숨김
-            tray.DoubleClick += delegate (object? s, EventArgs e)
-            {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-                this.ShowInTaskbar = true;
-                tray.Visible = false;
-            };
         }
     }
 }
