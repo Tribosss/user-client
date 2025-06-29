@@ -14,11 +14,19 @@
     <Grid>
         <Frame Name="PostListFrame"
        NavigationUIVisibility="Hidden" />
-        <Button Content="👤" Margin="730,27,20,357" Height="30" Width="30" FontSize="18"/>
+        
+        <Button Content="👤" Margin="720,27,50,393" Height="30" Width="30" FontSize="18"/>
+        
         <TextBlock Text="전체 글 보기" FontSize="20" FontWeight="Bold"
-           Margin="50,80,0,0" />
+           Margin="50 40 0 0" />
         <TextBlock Text="23,349개의 글" FontSize="12"
-           Margin="50,120,0,0" />
+           Margin="50 80 0 0" />
+
+        <ComboBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="70"
+          Margin="0 70 50 0" SelectedIndex="0">
+            <ComboBoxItem Content="15개씩" />
+            <ComboBoxItem Content="30개씩" />
+        </ComboBox>
 
         <DataGrid 
             x:Name="PostList"
@@ -26,10 +34,29 @@
             SelectedItem="{Binding SelectedPost, Mode=TwoWay}"
             HorizontalAlignment="Stretch"
             SelectionMode="Single"
-            Grid.ColumnSpan="2"
-            Grid.Row="1"
             AutoGenerateColumns="false"
+            Margin="50 110 50 30"
+            Background="White"
+            RowHeaderWidth="0"
             MouseDoubleClick="PostList_MouseDoubleClick">
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Padding" Value="3 2"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                <Border 
+                                    Padding="{TemplateBinding Padding}"
+                                    Background="{TemplateBinding Background}"
+                                    SnapsToDevicePixels="True">
+                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.CellStyle>
+
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Status}" Header="분류" IsReadOnly="True" Width="1*" />
                 <DataGridTextColumn Binding="{Binding Title}" Header="제목" IsReadOnly="True" Width="5*" />
@@ -37,11 +64,5 @@
                 <DataGridTextColumn Binding="{Binding Date}" Header="작성일" IsReadOnly="True" Width="2*" />
             </DataGrid.Columns>
         </DataGrid>
-        
-        <ComboBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="70"
-          Margin="0,120,30,0" SelectedIndex="0">
-            <ComboBoxItem Content="15개씩" />
-            <ComboBoxItem Content="30개씩" />
-        </ComboBox>
     </Grid>
 </UserControl>
