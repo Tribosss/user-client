@@ -1,5 +1,7 @@
-﻿using System.Configuration;
-using System.Data;
+﻿using PacketDotNet;
+using SharpPcap;
+using SharpPcap.LibPcap;
+using System.Text;
 using System.Windows;
 
 namespace user_client
@@ -9,6 +11,12 @@ namespace user_client
     /// </summary>
     public partial class App : System.Windows.Application
     {
+        public App()
+        {
+
+        }
+
+
     }
 
 }

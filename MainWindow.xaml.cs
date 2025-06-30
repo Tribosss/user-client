@@ -3,10 +3,15 @@ using SharpPcap;
 using SharpPcap.LibPcap;
 using System.Text;
 using System.Windows;
+using user_client.Model;
+using user_client.View;
 
-namespace user_client.View
+namespace user_client
 {
-    public partial class LoginWindow : Window
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
     {
         // 임시 키워드
         private readonly string[] _keywords = [
@@ -15,19 +20,32 @@ namespace user_client.View
             "yessss",
         ];
 
-        public LoginWindow()
+        public MainWindow()
         {
             InitializeComponent();
-            
-            // initalize Tray
+
+            // 트레이 초기화
             InitTray();
-            
-            // Device Select & Open
+
+            // 디바이스 선택 및 열기
             var device = LibPcapLiveDeviceList.Instance[6];
             Console.WriteLine(device.ToString());
             device.Open();
             device.OnPacketArrival += Device_OnPacketArrival;
             device.StartCapture();
+
+            // 페이지 표시
+            RootGrid.Children.Clear();
+            //LoginControl control = new LoginControl();
+            PostListControl control = new PostListControl();
+            control.SelectPostEvent += handleSelectPost;
+            RootGrid.Children.Add(control);
+        }
+
+        private void handleSelectPost(Post post)
+        {
+            RootGrid.Children.Clear();
+            RootGrid.Children.Add(new PostDetailControl(post));
         }
 
         void Device_OnPacketArrival(object s, PacketCapture e)
@@ -36,7 +54,7 @@ namespace user_client.View
             string text;
             byte[] rawBytes = e.GetPacket().Data;
             LinkLayers linkLayerType = e.GetPacket().LinkLayerType;
-            
+
             // 패킷 파싱
             Packet packet = Packet.ParsePacket(linkLayerType, rawBytes);
             EthernetPacket? ether = packet.Extract<EthernetPacket>();
@@ -44,7 +62,8 @@ namespace user_client.View
             IPPacket? ip = packet.Extract<IPPacket>();
             if (ip == null) return;
             // TCP/UDP 분류
-            switch (ip.Protocol) {
+            switch (ip.Protocol)
+            {
                 case ProtocolType.Udp:
                     {
                         payload = packet.Extract<UdpPacket>().PayloadData;
