@@ -1,6 +1,9 @@
-﻿using PacketDotNet;
+﻿using DotNetEnv;
+using MySql.Data.MySqlClient;
+using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
+using System.IO;
 using System.Text;
 using System.Windows;
 using user_client.Model;
@@ -28,7 +31,7 @@ namespace user_client
             InitTray();
 
             // 디바이스 선택 및 열기
-            var device = LibPcapLiveDeviceList.Instance[6];
+            LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[4];
             Console.WriteLine(device.ToString());
             device.Open();
             device.OnPacketArrival += Device_OnPacketArrival;
@@ -116,6 +119,9 @@ namespace user_client
                         break;
                     }
             }
+
+            if (sourcePort == 3306 || destPort == 3306) return;
+
             // payload 추출
             if (payload == null || payload.Length <= 0) return;
             text = Encoding.ASCII.GetString(payload);
@@ -127,7 +133,7 @@ namespace user_client
 
                 Console.WriteLine("======================");
                 Console.WriteLine($"Detected Keyword: {keyword}");
-                Console.WriteLine(text);
+                Console.WriteLine($"payload: {text}");
 
                 string now = DateTime.Now.ToString("yyyy-MM-dd");
 
@@ -152,10 +158,39 @@ namespace user_client
         {
             try
             {
-                string dbConnection = "Server=3.106.232.168;Port=3306;Database=Tri";
-            } catch (Exception e)
+                Env.Load();
+
+                string? host = Environment.GetEnvironmentVariable("DB_HOST");
+                if (host == null) return;
+                string? port = Environment.GetEnvironmentVariable("DB_PORT");
+                if (port == null) return;
+                string? uid = Environment.GetEnvironmentVariable("DB_UID");
+                if (uid == null) return;
+                string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
+                if (pwd == null) return;
+                string? name = Environment.GetEnvironmentVariable("DB_NAME");
+                if (name == null) return;
+
+                string dbConnection = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
+
+                using (MySqlConnection connection = new MySqlConnection(dbConnection))
+                {
+                    connection.Open();
+
+                    string query = "insert into suspicion_logs(msg, emp_id, source_ip, dest_ip, source_port, dest_port, keyword, detected_at) ";
+                    query += $"values ('{log.Msg}', 1, '{log.SourceIp}', '{log.DestIp}', {log.SourcePort}, {log.DestPort}, '{log.keyword}', '{log.DetectedAt}');";
+
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+
+                    if (cmd.ExecuteNonQuery() == 1) Console.WriteLine("Success Insert");
+                    else Console.WriteLine("Failed Insert");
+
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(ex.ToString());
             }
         }
     }
