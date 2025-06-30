@@ -42,51 +42,6 @@ namespace user_client
             RootGrid.Children.Add(control);
         }
 
-        private void handleSelectPost(Post post)
-        {
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new PostDetailControl(post));
-        }
-
-        void Device_OnPacketArrival(object s, PacketCapture e)
-        {
-            byte[]? payload = null;
-            string text;
-            byte[] rawBytes = e.GetPacket().Data;
-            LinkLayers linkLayerType = e.GetPacket().LinkLayerType;
-
-            // 패킷 파싱
-            Packet packet = Packet.ParsePacket(linkLayerType, rawBytes);
-            EthernetPacket? ether = packet.Extract<EthernetPacket>();
-            if (ether == null) return;
-            IPPacket? ip = packet.Extract<IPPacket>();
-            if (ip == null) return;
-            // TCP/UDP 분류
-            switch (ip.Protocol)
-            {
-                case ProtocolType.Udp:
-                    {
-                        payload = packet.Extract<UdpPacket>().PayloadData;
-                        break;
-                    }
-                case ProtocolType.Tcp: payload = packet.Extract<TcpPacket>().PayloadData; break;
-            }
-            // payload 추출
-            if (payload == null || payload.Length <= 0) return;
-            text = Encoding.ASCII.GetString(payload);
-
-            // 키워드 탐지
-            foreach (string keyword in _keywords)
-            {
-                if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
-
-                Console.WriteLine("======================");
-                Console.WriteLine($"Detected Keyword: {keyword}");
-                Console.WriteLine(text);
-                break;
-            }
-        }
-
         private void InitTray()
         {
             // 트레이 초기 설정
@@ -111,6 +66,97 @@ namespace user_client
                 this.ShowInTaskbar = true;
                 tray.Visible = false;
             };
+        }
+        private void handleSelectPost(Post post)
+        {
+            RootGrid.Children.Clear();
+            RootGrid.Children.Add(new PostDetailControl(post));
+        }
+
+        void Device_OnPacketArrival(object s, PacketCapture e)
+        {
+            byte[]? payload = null;
+            string sourceIp, destIp;
+            int sourcePort = 0;
+            int destPort = 0;
+            string text;
+
+            byte[] rawBytes = e.GetPacket().Data;
+            LinkLayers linkLayerType = e.GetPacket().LinkLayerType;
+
+            // 패킷 파싱
+            Packet packet = Packet.ParsePacket(linkLayerType, rawBytes);
+
+            EthernetPacket? ether = packet.Extract<EthernetPacket>();
+            if (ether == null) return;
+
+            IPPacket? ip = packet.Extract<IPPacket>();
+            if (ip == null) return;
+            sourceIp = ip.SourceAddress.ToString();
+            destIp = ip.DestinationAddress.ToString();
+
+            // TCP/UDP 분류
+            switch (ip.Protocol)
+            {
+                case ProtocolType.Udp:
+                    {
+                        UdpPacket udp = packet.Extract<UdpPacket>();
+                        if (udp == null) return;
+                        sourcePort = udp.SourcePort;
+                        destPort = udp.DestinationPort;
+                        payload = udp.PayloadData;
+                        break;
+                    }
+                case ProtocolType.Tcp:
+                    {
+                        TcpPacket tcp = packet.Extract<TcpPacket>();
+                        sourcePort = tcp.SourcePort; 
+                        destPort = tcp.DestinationPort;
+                        payload = tcp.PayloadData;
+                        break;
+                    }
+            }
+            // payload 추출
+            if (payload == null || payload.Length <= 0) return;
+            text = Encoding.ASCII.GetString(payload);
+
+            // 키워드 탐지
+            foreach (string keyword in _keywords)
+            {
+                if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
+
+                Console.WriteLine("======================");
+                Console.WriteLine($"Detected Keyword: {keyword}");
+                Console.WriteLine(text);
+
+                string now = DateTime.Now.ToString("yyyy-MM-dd");
+
+                SuspicionLog detectedLog = new SuspicionLog
+                {
+                    Msg = $"Detected Keyword {keyword}",
+                    keyword = keyword,
+                    EmpId = 1234,
+                    SourceIp = sourceIp,
+                    DestIp = destIp,
+                    SourcePort = sourcePort,
+                    DestPort = destPort,
+                    DetectedAt = now,
+                };
+                insertSuspicionLog(detectedLog);
+
+                break;
+            }
+        }
+
+        void insertSuspicionLog(SuspicionLog log)
+        {
+            try
+            {
+                string dbConnection = "Server=3.106.232.168;Port=3306;Database=Tri";
+            } catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
     }
 }
