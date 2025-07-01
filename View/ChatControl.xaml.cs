@@ -57,7 +57,7 @@ namespace user_client.View
         private void ConnectChatServer()
         {
             client = new TcpClient();
-            client.Connect("127.0.0.2", 9999);
+            client.Connect("127.0.0.1", 9999);
             Console.WriteLine("Connected Server");
             Console.ReadKey();
         }
