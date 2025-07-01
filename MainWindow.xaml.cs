@@ -1,6 +1,9 @@
-﻿using PacketDotNet;
+﻿using DotNetEnv;
+using MySql.Data.MySqlClient;
+using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
+using System.IO;
 using System.Text;
 using System.Windows;
 using user_client.Model;
@@ -30,7 +33,8 @@ namespace user_client
 
         private void InitializeDevice()
         {
-            var device = LibPcapLiveDeviceList.Instance[6];
+            LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[4];
+            
             Console.WriteLine(device.ToString());
             device.Open();
             device.OnPacketArrival += Device_OnPacketArrival;
@@ -61,6 +65,34 @@ namespace user_client
             };
 
             RootGrid.Children.Clear();
+        }
+
+        private void InitTray()
+        {
+            // 트레이 초기 설정
+            NotifyIcon tray = new NotifyIcon();
+            tray.Icon = Properties.Resources.TribTrayIcon;
+            tray.Visible = true;
+            tray.Text = "Tribosss";
+
+            // 최소화 시 작업표시줄 숨김 & 트레이 표시
+            this.StateChanged += (s, e) =>
+            {
+                if (this.WindowState != WindowState.Minimized) return;
+                this.Hide();
+                this.ShowInTaskbar = false;
+            };
+
+            // 트레이 더블클릭 시 작업표시줄 표시 & 트레이 숨김
+            tray.DoubleClick += delegate (object? s, EventArgs e)
+            {
+                this.Show();
+                this.WindowState = WindowState.Normal;
+                this.ShowInTaskbar = true;
+                tray.Visible = false;
+            };
+        }
+        private void handleSelectPost(Post post)
             RootGrid.Children.Add(createPostControl);
         }
 
@@ -72,48 +104,88 @@ namespace user_client
             RootGrid.Children.Clear();
             RootGrid.Children.Add(new PostDetailControl(post));
         }
+        private void handleGotoChatView()
+        {
+            RootGrid.Children.Clear();
+            RootGrid.Children.Add(new ChatControl());
+        }
 
         private void Device_OnPacketArrival(object s, PacketCapture e)
         {
-            try
+                        byte[]? payload = null;
+            string sourceIp, destIp;
+            int sourcePort = 0;
+            int destPort = 0;
+            string text;
+
+            byte[] rawBytes = e.GetPacket().Data;
+            LinkLayers linkLayerType = e.GetPacket().LinkLayerType;
+
+            // 패킷 파싱
+            Packet packet = Packet.ParsePacket(linkLayerType, rawBytes);
+
+            EthernetPacket? ether = packet.Extract<EthernetPacket>();
+            if (ether == null) return;
+
+            IPPacket? ip = packet.Extract<IPPacket>();
+            if (ip == null) return;
+            sourceIp = ip.SourceAddress.ToString();
+            destIp = ip.DestinationAddress.ToString();
+
+            // TCP/UDP 분류
+            switch (ip.Protocol)
             {
-                byte[]? payload = null;
-                string text;
-                byte[] rawBytes = e.GetPacket().Data;
-                LinkLayers linkLayerType = e.GetPacket().LinkLayerType;
-
-                // 패킷 파싱
-                Packet packet = Packet.ParsePacket(linkLayerType, rawBytes);
-                EthernetPacket? ether = packet.Extract<EthernetPacket>();
-                if (ether == null) return;
-                IPPacket? ip = packet.Extract<IPPacket>();
-                if (ip == null) return;
-
-                // TCP/UDP 분류
-                switch (ip.Protocol)
-                {
-                    case ProtocolType.Udp:
-                        payload = packet.Extract<UdpPacket>()?.PayloadData;
+                case ProtocolType.Udp:
+                    {
+                        UdpPacket udp = packet.Extract<UdpPacket>();
+                        if (udp == null) return;
+                        sourcePort = udp.SourcePort;
+                        destPort = udp.DestinationPort;
+                        payload = udp.PayloadData;
                         break;
-                    case ProtocolType.Tcp:
-                        payload = packet.Extract<TcpPacket>()?.PayloadData;
+                    }
+                case ProtocolType.Tcp:
+                    {
+                        TcpPacket tcp = packet.Extract<TcpPacket>();
+                        sourcePort = tcp.SourcePort; 
+                        destPort = tcp.DestinationPort;
+                        payload = tcp.PayloadData;
                         break;
-                }
+                    }
+            }
 
-                // payload 추출
-                if (payload == null || payload.Length <= 0) return;
-                text = Encoding.ASCII.GetString(payload);
+            if (sourcePort == 3306 || destPort == 3306) return;
 
-                // 키워드 탐지
-                foreach (string keyword in _keywords)
+            // payload 추출
+            if (payload == null || payload.Length <= 0) return;
+            text = Encoding.ASCII.GetString(payload);
+
+            // 키워드 탐지
+            foreach (string keyword in _keywords)
+            {
+                if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
+
+                Console.WriteLine("======================");
+                Console.WriteLine($"Detected Keyword: {keyword}");
+                Console.WriteLine($"payload: {text}");
+
+                string now = DateTime.Now.ToString("yyyy-MM-dd");
+
+                SuspicionLog detectedLog = new SuspicionLog
                 {
-                    if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                    Msg = $"Detected Keyword {keyword}",
+                    keyword = keyword,
+                    EmpId = 1234,
+                    SourceIp = sourceIp,
+                    DestIp = destIp,
+                    SourcePort = sourcePort,
+                    DestPort = destPort,
+                    DetectedAt = now,
+                };
+                insertSuspicionLog(detectedLog);
 
-                    Console.WriteLine("======================");
-                    Console.WriteLine($"Detected Keyword: {keyword}");
-                    Console.WriteLine(text);
-                    break;
-                }
+                break;
+            }
             }
             catch (Exception ex)
             {
@@ -121,32 +193,43 @@ namespace user_client
             }
         }
 
-        private void InitTray()
+        void insertSuspicionLog(SuspicionLog log)
         {
-            // 트레이 초기 설정
-            NotifyIcon tray = new NotifyIcon
-            {
-                Icon = Properties.Resources.TribTrayIcon, // 아이콘 리소스 확인 필요
-                Visible = true,
-                Text = "Tribosss"
-            };
+            try {
+                Env.Load();
 
-            // 최소화 시 작업표시줄 숨김 & 트레이 표시
-            this.StateChanged += (s, e) =>
-            {
-                if (this.WindowState != WindowState.Minimized) return;
-                this.Hide();
-                this.ShowInTaskbar = false;
-            };
+                string? host = Environment.GetEnvironmentVariable("DB_HOST");
+                if (host == null) return;
+                string? port = Environment.GetEnvironmentVariable("DB_PORT");
+                if (port == null) return;
+                string? uid = Environment.GetEnvironmentVariable("DB_UID");
+                if (uid == null) return;
+                string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
+                if (pwd == null) return;
+                string? name = Environment.GetEnvironmentVariable("DB_NAME");
+                if (name == null) return;
 
-            // 트레이 더블클릭 시 작업표시줄 표시 & 트레이 숨김
-            tray.DoubleClick += delegate
+                string dbConnection = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
+
+                using (MySqlConnection connection = new MySqlConnection(dbConnection))
+                {
+                    connection.Open();
+
+                    string query = "insert into suspicion_logs(msg, emp_id, source_ip, dest_ip, source_port, dest_port, keyword, detected_at) ";
+                    query += $"values ('{log.Msg}', 1, '{log.SourceIp}', '{log.DestIp}', {log.SourcePort}, {log.DestPort}, '{log.keyword}', '{log.DetectedAt}');";
+
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+
+                    if (cmd.ExecuteNonQuery() == 1) Console.WriteLine("Success Insert");
+                    else Console.WriteLine("Failed Insert");
+
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
             {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-                this.ShowInTaskbar = true;
-                tray.Visible = false;
-            };
+                Console.WriteLine(ex.ToString());
+            }
         }
     }
 }
