@@ -43,11 +43,13 @@ namespace user_client
 
         private void InitializePostListControl()
         {
-            var postListControl = new PostListControl();
+            PostListControl postListControl = new PostListControl();
 
             // 이벤트 연결
             postListControl.CreateEvent += HandleCreateEvent;
             postListControl.SelectPostEvent += HandleSelectPost;
+            postListControl.GotoChatEvnt += HandleGotoChatView;
+            
 
             // RootGrid에 추가
             RootGrid.Children.Clear();
@@ -67,6 +69,17 @@ namespace user_client
             RootGrid.Children.Clear();
         }
 
+        private void HandleSelectPost(Post post)
+        {
+            RootGrid.Children.Clear();
+            RootGrid.Children.Add(new PostDetailControl(post));
+        }
+        private void HandleGotoChatView()
+        {
+            RootGrid.Children.Clear();
+            RootGrid.Children.Add(new ChatControl());
+        }
+
         private void InitTray()
         {
             // 트레이 초기 설정
@@ -84,7 +97,7 @@ namespace user_client
             };
 
             // 트레이 더블클릭 시 작업표시줄 표시 & 트레이 숨김
-            tray.DoubleClick += delegate (object? s, EventArgs e)
+            tray.DoubleClick += delegate
             {
                 this.Show();
                 this.WindowState = WindowState.Normal;
@@ -92,100 +105,84 @@ namespace user_client
                 tray.Visible = false;
             };
         }
-        private void handleSelectPost(Post post)
-            RootGrid.Children.Add(createPostControl);
-        }
-
-
-
-        private void HandleSelectPost(Post post)
-        {
-            // 선택된 Post로 페이지 전환
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new PostDetailControl(post));
-        }
-        private void handleGotoChatView()
-        {
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new ChatControl());
-        }
 
         private void Device_OnPacketArrival(object s, PacketCapture e)
         {
-                        byte[]? payload = null;
-            string sourceIp, destIp;
-            int sourcePort = 0;
-            int destPort = 0;
-            string text;
+            try { 
+                byte[]? payload = null;
+                string sourceIp, destIp;
+                int sourcePort = 0;
+                int destPort = 0;
+                string text;
 
-            byte[] rawBytes = e.GetPacket().Data;
-            LinkLayers linkLayerType = e.GetPacket().LinkLayerType;
+                byte[] rawBytes = e.GetPacket().Data;
+                LinkLayers linkLayerType = e.GetPacket().LinkLayerType;
 
-            // 패킷 파싱
-            Packet packet = Packet.ParsePacket(linkLayerType, rawBytes);
+                // 패킷 파싱
+                Packet packet = Packet.ParsePacket(linkLayerType, rawBytes);
 
-            EthernetPacket? ether = packet.Extract<EthernetPacket>();
-            if (ether == null) return;
+                EthernetPacket? ether = packet.Extract<EthernetPacket>();
+                if (ether == null) return;
 
-            IPPacket? ip = packet.Extract<IPPacket>();
-            if (ip == null) return;
-            sourceIp = ip.SourceAddress.ToString();
-            destIp = ip.DestinationAddress.ToString();
+                IPPacket? ip = packet.Extract<IPPacket>();
+                if (ip == null) return;
+                sourceIp = ip.SourceAddress.ToString();
+                destIp = ip.DestinationAddress.ToString();
 
-            // TCP/UDP 분류
-            switch (ip.Protocol)
-            {
-                case ProtocolType.Udp:
-                    {
-                        UdpPacket udp = packet.Extract<UdpPacket>();
-                        if (udp == null) return;
-                        sourcePort = udp.SourcePort;
-                        destPort = udp.DestinationPort;
-                        payload = udp.PayloadData;
-                        break;
-                    }
-                case ProtocolType.Tcp:
-                    {
-                        TcpPacket tcp = packet.Extract<TcpPacket>();
-                        sourcePort = tcp.SourcePort; 
-                        destPort = tcp.DestinationPort;
-                        payload = tcp.PayloadData;
-                        break;
-                    }
-            }
-
-            if (sourcePort == 3306 || destPort == 3306) return;
-
-            // payload 추출
-            if (payload == null || payload.Length <= 0) return;
-            text = Encoding.ASCII.GetString(payload);
-
-            // 키워드 탐지
-            foreach (string keyword in _keywords)
-            {
-                if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
-
-                Console.WriteLine("======================");
-                Console.WriteLine($"Detected Keyword: {keyword}");
-                Console.WriteLine($"payload: {text}");
-
-                string now = DateTime.Now.ToString("yyyy-MM-dd");
-
-                SuspicionLog detectedLog = new SuspicionLog
+                // TCP/UDP 분류
+                switch (ip.Protocol)
                 {
-                    Msg = $"Detected Keyword {keyword}",
-                    keyword = keyword,
-                    EmpId = 1234,
-                    SourceIp = sourceIp,
-                    DestIp = destIp,
-                    SourcePort = sourcePort,
-                    DestPort = destPort,
-                    DetectedAt = now,
-                };
-                insertSuspicionLog(detectedLog);
+                    case ProtocolType.Udp:
+                        {
+                            UdpPacket udp = packet.Extract<UdpPacket>();
+                            if (udp == null) return;
+                            sourcePort = udp.SourcePort;
+                            destPort = udp.DestinationPort;
+                            payload = udp.PayloadData;
+                            break;
+                        }
+                    case ProtocolType.Tcp:
+                        {
+                            TcpPacket tcp = packet.Extract<TcpPacket>();
+                            sourcePort = tcp.SourcePort;
+                            destPort = tcp.DestinationPort;
+                            payload = tcp.PayloadData;
+                            break;
+                        }
+                }
 
-                break;
-            }
+                if (sourcePort == 3306 || destPort == 3306) return;
+
+                // payload 추출
+                if (payload == null || payload.Length <= 0) return;
+                text = Encoding.ASCII.GetString(payload);
+
+                // 키워드 탐지
+                foreach (string keyword in _keywords)
+                {
+                    if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
+
+                    Console.WriteLine("======================");
+                    Console.WriteLine($"Detected Keyword: {keyword}");
+                    Console.WriteLine($"payload: {text}");
+
+                    string now = DateTime.Now.ToString("yyyy-MM-dd");
+
+                    SuspicionLog detectedLog = new SuspicionLog
+                    {
+                        Msg = $"Detected Keyword {keyword}",
+                        keyword = keyword,
+                        EmpId = 1234,
+                        SourceIp = sourceIp,
+                        DestIp = destIp,
+                        SourcePort = sourcePort,
+                        DestPort = destPort,
+                        DetectedAt = now,
+                    };
+                    insertSuspicionLog(detectedLog);
+
+                    break;
+                }
             }
             catch (Exception ex)
             {
