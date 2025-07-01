@@ -8,20 +8,14 @@ using System.Text;
 using System.Windows;
 using user_client.Model;
 using user_client.View;
+using System.Windows.Forms; // NotifyIcon 클래스 추가
 
 namespace user_client
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         // 임시 키워드
-        private readonly string[] _keywords = [
-            "HelloWorld",
-            "Hello",
-            "yessss",
-        ];
+        private readonly string[] _keywords = { "HelloWorld", "Hello", "yessss" };
 
         public MainWindow()
         {
@@ -30,20 +24,47 @@ namespace user_client
             // 트레이 초기화
             InitTray();
 
-            // 디바이스 선택 및 열기
+            // 디바이스 초기화 및 시작
+            InitializeDevice();
+
+            // PostListControl 초기화
+            InitializePostListControl();
+        }
+
+        private void InitializeDevice()
+        {
             LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[4];
+            
             Console.WriteLine(device.ToString());
             device.Open();
             device.OnPacketArrival += Device_OnPacketArrival;
             device.StartCapture();
+        }
 
-            // 페이지 표시
+        private void InitializePostListControl()
+        {
+            var postListControl = new PostListControl();
+
+            // 이벤트 연결
+            postListControl.CreateEvent += HandleCreateEvent;
+            postListControl.SelectPostEvent += HandleSelectPost;
+
+            // RootGrid에 추가
             RootGrid.Children.Clear();
-            //LoginControl control = new LoginControl();
-            PostListControl control = new PostListControl();
-            control.SelectPostEvent += handleSelectPost;
-            control.GotoChatEvnt += handleGotoChatView;
-            RootGrid.Children.Add(control);
+            RootGrid.Children.Add(postListControl);
+        }
+
+        private void HandleCreateEvent()
+        {
+            var createPostControl = new CreatePostControl();
+
+            createPostControl.PostCreated += newPost =>
+            {
+                RootGrid.Children.Clear();
+                RootGrid.Children.Add(new PostDetailControl(newPost));
+            };
+
+            RootGrid.Children.Clear();
         }
 
         private void InitTray()
@@ -72,7 +93,14 @@ namespace user_client
             };
         }
         private void handleSelectPost(Post post)
+            RootGrid.Children.Add(createPostControl);
+        }
+
+
+
+        private void HandleSelectPost(Post post)
         {
+            // 선택된 Post로 페이지 전환
             RootGrid.Children.Clear();
             RootGrid.Children.Add(new PostDetailControl(post));
         }
@@ -82,9 +110,9 @@ namespace user_client
             RootGrid.Children.Add(new ChatControl());
         }
 
-        void Device_OnPacketArrival(object s, PacketCapture e)
+        private void Device_OnPacketArrival(object s, PacketCapture e)
         {
-            byte[]? payload = null;
+                        byte[]? payload = null;
             string sourceIp, destIp;
             int sourcePort = 0;
             int destPort = 0;
@@ -158,12 +186,16 @@ namespace user_client
 
                 break;
             }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing packet: {ex.Message}");
+            }
         }
 
         void insertSuspicionLog(SuspicionLog log)
         {
-            try
-            {
+            try {
                 Env.Load();
 
                 string? host = Environment.GetEnvironmentVariable("DB_HOST");
