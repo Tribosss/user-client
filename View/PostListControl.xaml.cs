@@ -22,6 +22,8 @@ namespace user_client.View
     {
         private readonly PostViewModel _viewModel;
         public event Action<Post>? SelectPostEvent;
+        public event Action? GotoChatEvnt;
+
         public PostListControl()
         {
             InitializeComponent();
@@ -37,6 +39,11 @@ namespace user_client.View
             Post? selectedPost = _viewModel.SelectedPost;
             if (selectedPost == null) return;
             SelectPostEvent?.Invoke(selectedPost);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            GotoChatEvnt?.Invoke();
         }
     }
 }

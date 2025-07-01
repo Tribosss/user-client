@@ -5,6 +5,9 @@
     <Compile Update="MainWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\ChatControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\LoginControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -64,5 +64,7 @@
                 <DataGridTextColumn Binding="{Binding Date}" Header="작성일" IsReadOnly="True" Width="2*" />
             </DataGrid.Columns>
         </DataGrid>
+        <Button Width="100" Height="30" Content="Goto Chat" Margin="680 400 0 0" Click="Button_Click"></Button>
     </Grid>
+
 </UserControl>

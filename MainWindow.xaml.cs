@@ -42,6 +42,7 @@ namespace user_client
             //LoginControl control = new LoginControl();
             PostListControl control = new PostListControl();
             control.SelectPostEvent += handleSelectPost;
+            control.GotoChatEvnt += handleGotoChatView;
             RootGrid.Children.Add(control);
         }
 
@@ -74,6 +75,11 @@ namespace user_client
         {
             RootGrid.Children.Clear();
             RootGrid.Children.Add(new PostDetailControl(post));
+        }
+        private void handleGotoChatView()
+        {
+            RootGrid.Children.Clear();
+            RootGrid.Children.Add(new ChatControl());
         }
 
         void Device_OnPacketArrival(object s, PacketCapture e)
