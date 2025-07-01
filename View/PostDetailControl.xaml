@@ -86,5 +86,23 @@
                    VerticalAlignment="Top"  
                    Margin="62,112,0,0"
                    Grid.Row="1" Height="268"/>
+        <Button Content="←" 
+        Width="30" Height="30" 
+        FontSize="18" 
+        HorizontalAlignment="Left" 
+        VerticalAlignment="Top" 
+        Margin="10"
+        Click="BackButtonClick"
+        Grid.Row="0" Grid.Column="0"/>
+        <Button Content="🏠" 
+        Width="30" Height="30" 
+        FontSize="18" 
+        HorizontalAlignment="Left" 
+        VerticalAlignment="Top" 
+        Margin="50, 10, 0, 0"
+        Click="HomeButtonClick"
+        Grid.Row="0" Grid.Column="0"/>
+
+
     </Grid>
 </UserControl>
