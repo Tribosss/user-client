@@ -213,7 +213,7 @@ namespace user_client.Model
             }
 
             client = new TcpClient();
-            client.Connect("127.0.0.1", 9999);
+            client.Connect("3.27.68.176", 9999);
 
             byte[] byteData = new byte[1024];
             byteData = Encoding.Default.GetBytes(parsedName);
