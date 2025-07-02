@@ -21,7 +21,7 @@ namespace user_client.Model
             sendMessageListToView = new ConcurrentBag<string>();
             receiveMessageListToView = new ConcurrentBag<string>();
 
-            receiveMessageThread = new Thread(receiveMessage);
+            receiveMessageThread = new Thread(ReceiveMessage);
 
             while (true)
             {
@@ -46,7 +46,7 @@ namespace user_client.Model
                         }
                     case ChatStaticDefine.SEND_MESSAGE:
                         {
-                            if (client != null)
+                            if (client == null)
                             {
                                 Console.WriteLine("First Connect to Server");
                                 Console.ReadKey();
@@ -108,7 +108,7 @@ namespace user_client.Model
             Console.ReadKey();
         }
 
-        private void receiveMessage()
+        private void ReceiveMessage()
         {
             string receiveMessage = "";
             List<string> receiveMessageList = new List<string>();
