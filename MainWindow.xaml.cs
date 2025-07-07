@@ -1,14 +1,17 @@
 ﻿using DotNetEnv;
 using MySql.Data.MySqlClient;
 using PacketDotNet;
+using PacketDotNet.Ieee80211;
 using SharpPcap;
 using SharpPcap.LibPcap;
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Forms; // NotifyIcon 클래스 추가
 using user_client.Model;
 using user_client.View;
-using System.Windows.Forms; // NotifyIcon 클래스 추가
+using user_client.ViewModel;
+
 
 namespace user_client
 {
@@ -16,11 +19,14 @@ namespace user_client
     {
         // 임시 키워드
         private readonly string[] _keywords = { "HelloWorld", "Hello", "yessss" };
+        private readonly PostViewModel _sharedViewModel = new PostViewModel();
+
 
         public MainWindow()
         {
+            
             InitializeComponent();
-
+            NavigateToPostList();
             // 트레이 초기화
             InitTray();
 
@@ -30,7 +36,27 @@ namespace user_client
             // PostListControl 초기화
             InitializePostListControl();
         }
+        private void HomeButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToPostList();
+        }
+        public void NavigateToPostList()
+        {
+            var postListControl = new PostListControl(_sharedViewModel);
+            postListControl.SelectPostEvent += NavigateToPostDetail;
+            postListControl.CreateEvent += HandleCreateEvent;
+            postListControl.GotoChatEvnt += HandleGotoChatView;
 
+            postListControl.LoadPostsFromDatabase();
+            ContentArea.Children.Clear();
+            ContentArea.Children.Add(postListControl);
+        }
+        private void NavigateToPostDetail(Model.Post selectedPost)
+        {
+            var postDetailControl = new View.PostDetailControl(selectedPost, NavigateToPostList);
+            ContentArea.Children.Clear();
+            ContentArea.Children.Add(postDetailControl);
+        }
         private void InitializeDevice()
         {
             LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[4];
@@ -43,17 +69,17 @@ namespace user_client
 
         private void InitializePostListControl()
         {
-            PostListControl postListControl = new PostListControl();
+            PostListControl postListControl = new PostListControl(_sharedViewModel);
 
             // 이벤트 연결
             postListControl.CreateEvent += HandleCreateEvent;
             postListControl.SelectPostEvent += HandleSelectPost;
             postListControl.GotoChatEvnt += HandleGotoChatView;
-            
+
 
             // RootGrid에 추가
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(postListControl);
+            ContentArea.Children.Clear();
+            ContentArea.Children.Add(postListControl);
         }
 
         private void HandleCreateEvent()
@@ -62,22 +88,23 @@ namespace user_client
 
             createPostControl.PostCreated += newPost =>
             {
-                RootGrid.Children.Clear();
-                RootGrid.Children.Add(new PostDetailControl(newPost));
+                _sharedViewModel.Posts.Insert(0, newPost);
+                NavigateToPostDetail(newPost);
             };
 
-            RootGrid.Children.Clear();
+            ContentArea.Children.Clear();
+            ContentArea.Children.Add(createPostControl);
         }
 
         private void HandleSelectPost(Post post)
         {
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new PostDetailControl(post));
+            ContentArea.Children.Clear();
+            ContentArea.Children.Add(new PostDetailControl(post, NavigateToPostList));
         }
         private void HandleGotoChatView()
         {
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new ChatControl());
+            ContentArea.Children.Clear();
+            ContentArea.Children.Add(new ChatControl());
         }
 
         private void InitTray()

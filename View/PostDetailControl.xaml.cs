@@ -21,10 +21,25 @@ namespace user_client.View
     /// </summary>
     public partial class PostDetailControl : System.Windows.Controls.UserControl
     {
-        public PostDetailControl(Post post)
+        private Action _goBackCallback;
+        public PostDetailControl(Post selectedPost, Action goBackCallback )
         {
+            _goBackCallback= goBackCallback;
             InitializeComponent();
-            this.DataContext = post;
+            this.DataContext = selectedPost;
         }
+        private void BackButton_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            _goBackCallback?.Invoke();
+        }
+        private void HomeButton_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.NavigateToPostList(); // ← MainWindow에 이 메서드가 public이어야 함
+            }
+        }
+
     }
 }
