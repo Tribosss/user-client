@@ -45,5 +45,12 @@
 
             <Button Content="저장" Height="40" Width="80" HorizontalAlignment="Center" Click="SaveButton_Click" />
         </StackPanel>
+        <StackPanel Orientation="Horizontal" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="10,10,0,0"
+                Grid.Row="0" Grid.Column="0">
+            <Button Content="🏠" Width="40" Height="30" Margin="0,0,10,0" Click="HomeButton_Click"/>
+        </StackPanel>
     </Grid>
 </UserControl>

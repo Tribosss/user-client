@@ -7,6 +7,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid Name="RootGrid">
-        
+        <Grid x:Name="ContentArea" Margin="0,50,0,0"/>
     </Grid>
 </Window>
