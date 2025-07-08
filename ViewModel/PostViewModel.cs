@@ -11,10 +11,10 @@
         class PostViewModel
         {
             public ObservableCollection<Post> Posts { get; set; } = new ObservableCollection<Post>{
-                    new Post { Status = "공지", Title = "환영합니다", Author = "관리자", Date = DateTime.Now, Body = "1234" },
-                    new Post { Status = "공지", Title = "업데이트 안내", Author = "관리자", Date = DateTime.Now, Body = "1234"  },
-                    new Post { Status = "질문", Title = "WPF 데이터 바인딩", Author = "사용자1", Date = DateTime.Now, Body = "1234"  },
-                    new Post { Status = "일반", Title = "XAML 디자인 문의", Author = "사용자2", Date = DateTime.Now, Body = "1234"  }
+                    new Post { Status = "공지", Title = "환영합니다", Author = "관리자", CreatedAt = DateTime.Now, Body = "1234" },
+                    new Post { Status = "공지", Title = "업데이트 안내", Author = "관리자", CreatedAt = DateTime.Now, Body = "1234"  },
+                    new Post { Status = "질문", Title = "WPF 데이터 바인딩", Author = "사용자1", CreatedAt = DateTime.Now, Body = "1234"  },
+                    new Post { Status = "일반", Title = "XAML 디자인 문의", Author = "사용자2", CreatedAt = DateTime.Now, Body = "1234"  }
             };
             private Post? _selectedPost;
             public Post? SelectedPost

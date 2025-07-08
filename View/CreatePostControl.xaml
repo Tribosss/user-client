@@ -43,7 +43,7 @@
             <TextBlock Text="내용" FontWeight="Bold" Margin="0,0,0,5" />
             <TextBox x:Name="BodyTextBox" Height="100" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,15" />
 
-            <Button Content="저장" Height="40" Width="80" HorizontalAlignment="Center" Click="SaveButton_Click" />
+            <Button Content="저장" Height="40" Width="80" HorizontalAlignment="Center" Click="SaveButtonClick" />
         </StackPanel>
     </Grid>
 </UserControl>

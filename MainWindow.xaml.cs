@@ -29,8 +29,26 @@ namespace user_client
 
             // PostListControl 초기화
             InitializePostListControl();
+            ShowPostList();
+            MainContent.Content = new PostListControl();
+        }
+        public void NavigateTo(System.Windows.Controls.UserControl control)
+        {
+            MainContent.Content = control;
         }
 
+        private void ShowPostList()
+        {
+            var postListControl = new PostListControl();
+            postListControl.SelectPostEvent += ShowPostDetail;
+            MainContent.Content = postListControl;
+        }
+
+        private void ShowPostDetail(Post selectedPost)
+        {
+            var postDetailControl = new PostDetailControl(selectedPost, ShowPostList);
+            MainContent.Content = postDetailControl;
+        }
         private void InitializeDevice()
         {
             LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[4];
