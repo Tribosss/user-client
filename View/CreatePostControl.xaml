@@ -26,7 +26,8 @@
                 Grid.Row="0" Grid.Column="1" />
 
         <!-- 콤보박스 -->
-        <ComboBox HorizontalAlignment="Right" 
+        <ComboBox x:Name="TypeComboBox"
+                  HorizontalAlignment="Right" 
                   VerticalAlignment="Top" 
                   Width="70"
                   Margin="0,70,30,0"

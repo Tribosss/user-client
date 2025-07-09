@@ -22,6 +22,7 @@ namespace user_client.View
 {
     public partial class PostListControl : System.Windows.Controls.UserControl
     {
+
         private readonly PostViewModel _viewModel;
         public event Action<user_client.Model.Post>? SelectPostEvent;
         public event Action? GotoChatEvnt;
@@ -34,6 +35,10 @@ namespace user_client.View
             this.DataContext = _viewModel;
 
             LoadPostsFromDatabase();
+        }
+        private void OnPostCreated(Post post)
+        {
+            _viewModel.AddPost(post); // ViewModel에 추가 + 마지막 페이지 이동
         }
         private void CreateButton_Click(object sender, RoutedEventArgs e)
         {
@@ -68,27 +73,28 @@ namespace user_client.View
                 {
                     connection.Open();
 
-                    string selectQuery = "SELECT Title, Body, Date, Author, Status FROM Post ORDER BY Date DESC;";
+                    string selectQuery = "SELECT Title, Body, created_at, Author, Type FROM posts ORDER BY created_at DESC;";
                     MySqlCommand selectCmd = new MySqlCommand(selectQuery, connection);
                     MySqlDataReader rdr = selectCmd.ExecuteReader();
 
-                    _viewModel.Posts.Clear(); // 기존 데이터 초기화
+                    _viewModel.AllPosts.Clear();
 
                     while (rdr.Read())
                     {
                         Post post = new Post
                         {
-                            Title = rdr.GetString("title"),
+                            Title = rdr.GetString("Title"),
                             Body = rdr.GetString("Body"),
-                            Date = rdr.GetDateTime("Date"),
+                            Date = rdr.GetDateTime("created_at"),
                             Author = rdr.IsDBNull(rdr.GetOrdinal("Author")) ? "익명" : rdr.GetString("Author"),
-                            Status = rdr.IsDBNull(rdr.GetOrdinal("Status")) ? "일반" : rdr.GetString("Status")
+                            Type = rdr.IsDBNull(rdr.GetOrdinal("Type")) ? "일반" : rdr.GetString("Type")
                         };
 
-                        _viewModel.Posts.Add(post);
+                        _viewModel.AllPosts.Add(post);
                     }
-
-                    connection.Close();
+                    _viewModel.CurrentPage = 1;
+                    _viewModel.UpdatePostsForCurrentPage();
+                    //connection.Close();
                 }
             }
             catch (Exception ex)
@@ -101,5 +107,21 @@ namespace user_client.View
         {
             GotoChatEvnt?.Invoke();
         }
+        private void PrevPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel.CurrentPage > 1)
+            {
+                _viewModel.CurrentPage--;
+            }
+        }
+
+        private void NextPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel.CurrentPage < _viewModel.TotalPages)
+            {
+                _viewModel.CurrentPage++;
+            }
+        }
+
     }
 }

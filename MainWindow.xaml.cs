@@ -20,6 +20,7 @@ namespace user_client
         // 임시 키워드
         private readonly string[] _keywords = { "HelloWorld", "Hello", "yessss" };
         private readonly PostViewModel _sharedViewModel = new PostViewModel();
+        public PostViewModel SharedViewModel => _sharedViewModel;
 
 
         public MainWindow()
@@ -53,7 +54,7 @@ namespace user_client
         }
         private void NavigateToPostDetail(Model.Post selectedPost)
         {
-            var postDetailControl = new View.PostDetailControl(selectedPost, NavigateToPostList);
+            var postDetailControl = new View.PostDetailControl(selectedPost, _sharedViewModel, NavigateToPostList);
             ContentArea.Children.Clear();
             ContentArea.Children.Add(postDetailControl);
         }
@@ -77,7 +78,7 @@ namespace user_client
             postListControl.GotoChatEvnt += HandleGotoChatView;
 
 
-            // RootGrid에 추가
+            
             ContentArea.Children.Clear();
             ContentArea.Children.Add(postListControl);
         }
@@ -98,8 +99,9 @@ namespace user_client
 
         private void HandleSelectPost(Post post)
         {
+            var postDetailControl = new View.PostDetailControl(post, _sharedViewModel, NavigateToPostList);
             ContentArea.Children.Clear();
-            ContentArea.Children.Add(new PostDetailControl(post, NavigateToPostList));
+            ContentArea.Children.Add(postDetailControl);
         }
         private void HandleGotoChatView()
         {

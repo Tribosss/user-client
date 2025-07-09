@@ -53,11 +53,13 @@
                     Grid.Row="1">
             <Button Content="수정" 
                     Width="40" Height="30" 
-                    FontSize="12" />
+                    FontSize="12"
+                    Click="EditButton_Click" />
             <Button Content="삭제" 
                     Margin="5,0,0,0"
                     Width="40" Height="30" 
-                    FontSize="12" />
+                    FontSize="12"
+                    Click="DeleteButton_Click" />
         </StackPanel>
 
         <!-- Date: 오른쪽 버튼의 왼쪽 대각선 아래 -->
