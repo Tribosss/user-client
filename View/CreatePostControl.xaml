@@ -26,7 +26,8 @@
                 Grid.Row="0" Grid.Column="1" />
 
         <!-- 콤보박스 -->
-        <ComboBox HorizontalAlignment="Right" 
+        <ComboBox x:Name="TypeComboBox"
+                  HorizontalAlignment="Right" 
                   VerticalAlignment="Top" 
                   Width="70"
                   Margin="0,70,30,0"
@@ -44,6 +45,13 @@
             <TextBox x:Name="BodyTextBox" Height="100" TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,15" />
 
             <Button Content="저장" Height="40" Width="80" HorizontalAlignment="Center" Click="SaveButton_Click" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="10,10,0,0"
+                Grid.Row="0" Grid.Column="0">
+            <Button Content="🏠" Width="40" Height="30" Margin="0,0,10,0" Click="HomeButton_Click"/>
         </StackPanel>
     </Grid>
 </UserControl>
