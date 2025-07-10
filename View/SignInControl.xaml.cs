@@ -1,9 +1,17 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Data;
+using System.Windows.Documents;
+
 using MySql.Data.MySqlClient; // DB 연결을 위한 네임스페이스 추가
 using DotNetEnv;              // .env에서 DB 환경변수 로드용
+
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using System.Windows;
+
 
 namespace user_client.View
 {

@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -107,11 +108,18 @@ namespace user_client.View
                         return;
                     }
 
+                    byte[] salt = GenerateSalt(16);
+                    pw = SHA256Hash(pw, salt);
+                    string saltStr = Convert.ToBase64String(salt);
+                    string requestedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
                     // INSERT 쿼리 작성 (DB 테이블명과 칼럼명에 맞게 수정)
-                    string insertQuery = "INSERT INTO employees (id, password, role_id) VALUES (@id, @pw, 1)";
+                    string insertQuery = "INSERT INTO signup_requests (temp_emp_id, password, salt, requested_at) VALUES (@id, @pw, @salt, @reqAt)";
                     MySqlCommand cmd = new MySqlCommand(insertQuery, connection);
                     cmd.Parameters.AddWithValue("@id", name); // 사용자 사번
                     cmd.Parameters.AddWithValue("@pw", pw); // 사용자 비밀번호
+                    cmd.Parameters.AddWithValue("@salt", saltStr); 
+                    cmd.Parameters.AddWithValue("@reqAt", requestedAt); 
                     // role_id는 예시로 1(intern)이라고 지정
 
                     int result = cmd.ExecuteNonQuery(); // 실행 결과 행 수 반환
@@ -134,7 +142,7 @@ namespace user_client.View
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("DB 오류: " + ex.Message);
+                Console.WriteLine(ex.ToString());
             }
 
             // Auth 객체 생성 (추후 사용 목적에 따라 저장 가능)
@@ -143,6 +151,29 @@ namespace user_client.View
                 LoginId = name,
                 Password = pw
             };
+        }
+        private byte[] GenerateSalt(int size = 32)
+        {
+            byte[] salt = new byte[size];
+            RandomNumberGenerator rng = RandomNumberGenerator.Create();
+            rng.GetBytes(salt);
+            return salt;
+        }
+        private string SHA256Hash(string rawData, byte[] salt)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(rawData);
+            byte[] dataWithSalt = new byte[data.Length + salt.Length];
+            Buffer.BlockCopy(salt, 0, dataWithSalt, 0, salt.Length);
+            Buffer.BlockCopy(data, 0, dataWithSalt, salt.Length, data.Length);
+
+            SHA256 sha = SHA256.Create();
+            byte[] hashBytes = sha.ComputeHash(dataWithSalt);
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in hashBytes)
+            {
+                sb.Append(b.ToString("x2"));
+            }
+            return sb.ToString();
         }
     }
 }
