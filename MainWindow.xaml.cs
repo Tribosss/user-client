@@ -33,7 +33,7 @@ namespace user_client
 
         private void InitializeDevice()
         {
-            LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[4];
+            LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[6];
             
             Console.WriteLine(device.ToString());
             device.Open();
@@ -179,6 +179,8 @@ namespace user_client
                         DestPort = destPort,
                         DetectedAt = now,
                     };
+
+
                     insertSuspicionLog(detectedLog);
 
                     break;
@@ -190,7 +192,7 @@ namespace user_client
             }
         }
 
-        void insertSuspicionLog(SuspicionLog log)
+        private void insertSuspicionLog(SuspicionLog log)
         {
             try {
                 Env.Load();
