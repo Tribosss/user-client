@@ -56,7 +56,7 @@ namespace user_client.View
             var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
             if (mainWindow == null) return;
 
-            var createPostControl = new CreatePostControl(_currentPost, true);  // ← 이제 오류 안 남
+            var createPostControl = new CreatePostControl(_currentPost, true); 
             mainWindow.ContentArea.Children.Clear();
             mainWindow.ContentArea.Children.Add(createPostControl);
         }

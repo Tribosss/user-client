@@ -88,7 +88,7 @@ namespace user_client.View
                             Body = rdr.GetString("Body"),
                             Date = rdr.GetDateTime("created_at"),
                             Author = rdr.IsDBNull(rdr.GetOrdinal("Author")) ? "익명" : rdr.GetString("Author"),
-                            Type = rdr.IsDBNull(rdr.GetOrdinal("Type")) ? "일반" : rdr.GetString("Type")
+                            Type = rdr.IsDBNull(rdr.GetOrdinal("Type")) ? "NORMAL" : rdr.GetString("Type")
                         };
 
                         _viewModel.AllPosts.Add(post);

@@ -12,7 +12,7 @@ namespace user_client.View
         public event Action<Post>? PostCreated;
         private bool _isEditMode;
         private Post? _editingPost;
-        private string? _originalTitle; // 원래 제목 저장용
+        private string? _originalTitle;
 
         public CreatePostControl()
         {
@@ -58,7 +58,7 @@ namespace user_client.View
                     insertCmd.Parameters.AddWithValue("@body", post.Body);
                     insertCmd.Parameters.AddWithValue("@date", post.Date);
                     insertCmd.Parameters.AddWithValue("@author", post.Author ?? "익명");
-                    insertCmd.Parameters.AddWithValue("@Type", post.Type ?? "일반");
+                    insertCmd.Parameters.AddWithValue("@Type", post.Type ?? "NORMAL");
 
                     if (insertCmd.ExecuteNonQuery() == 1)
                         Console.WriteLine("Success Insert");
@@ -76,7 +76,7 @@ namespace user_client.View
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            string selectedType = (TypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "일반";
+            string selectedType = (TypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "NORMAL";
 
             if (_isEditMode && _editingPost != null)
             {
@@ -103,9 +103,7 @@ namespace user_client.View
                 if (mainWindow != null)
                 {
                     var viewModel = mainWindow.SharedViewModel;
-                    viewModel.AllPosts.Insert(0, newPost); // 맨 위에 추가
-
-                    // 🧡 마지막 페이지로 이동
+                    viewModel.AllPosts.Insert(0, newPost); 
                     viewModel.CurrentPage = viewModel.TotalPages;
                 }
                 PostCreated?.Invoke(newPost);
@@ -144,7 +142,7 @@ namespace user_client.View
 
                     updateCmd.Parameters.AddWithValue("@title", post.Title);
                     updateCmd.Parameters.AddWithValue("@body", post.Body);
-                    updateCmd.Parameters.AddWithValue("@Type", post.Type ?? "일반"); // 🔧 이 줄이 반드시 필요
+                    updateCmd.Parameters.AddWithValue("@Type", post.Type ?? "NORMAL"); 
                     updateCmd.Parameters.AddWithValue("@originalTitle", _originalTitle); // 만약 ID 필드가 있다면 ID로 수정 필요
                     int rowsAffected = updateCmd.ExecuteNonQuery();
 
