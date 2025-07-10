@@ -24,7 +24,7 @@ namespace user_client.View
         public PostDetailControl(Post post)
         {
             InitializeComponent();
-            Title.Text = post.Title;
+            this.DataContext = post;
         }
     }
 }
