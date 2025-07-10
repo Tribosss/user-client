@@ -52,9 +52,8 @@ namespace user_client.View
                 using (MySqlConnection connection = new MySqlConnection(dbConnection))
                 {
                     connection.Open();
-                    string insertQuery = "INSERT INTO posts (id, Title, Body, created_at, Author, Type) VALUES (@id, @title, @body, @date, @author, @Type)";
+                    string insertQuery = "INSERT INTO posts (Title, Body, created_at, Author, Type) VALUES (@title, @body, @date, @author, @Type)";
                     MySqlCommand insertCmd = new MySqlCommand(insertQuery, connection);
-                    insertCmd.Parameters.AddWithValue("@id", 24);
                     insertCmd.Parameters.AddWithValue("@title", post.Title);
                     insertCmd.Parameters.AddWithValue("@body", post.Body);
                     insertCmd.Parameters.AddWithValue("@date", post.Date);
@@ -140,14 +139,16 @@ namespace user_client.View
                 using (MySqlConnection connection = new MySqlConnection(dbConnection))
                 {
                     connection.Open();
-                    string updateQuery = "UPDATE posts SET Title = @title, Body = @body, Type = @Type WHERE Title = @originalTitle"; // 임시로 title 기준 사용
+                    string updateQuery = "UPDATE posts SET Title = @title, Body = @body, Type = @Type WHERE Title = @originalTitle";
                     MySqlCommand updateCmd = new MySqlCommand(updateQuery, connection);
 
                     updateCmd.Parameters.AddWithValue("@title", post.Title);
                     updateCmd.Parameters.AddWithValue("@body", post.Body);
+                    updateCmd.Parameters.AddWithValue("@Type", post.Type ?? "일반"); // 🔧 이 줄이 반드시 필요
                     updateCmd.Parameters.AddWithValue("@originalTitle", _originalTitle); // 만약 ID 필드가 있다면 ID로 수정 필요
+                    int rowsAffected = updateCmd.ExecuteNonQuery();
 
-                    if (updateCmd.ExecuteNonQuery() == 1)
+                    if (rowsAffected == 1)
                         Console.WriteLine("Success Update");
                     else
                         Console.WriteLine("Failed Update");

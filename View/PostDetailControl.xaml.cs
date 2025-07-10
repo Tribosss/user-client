@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 using user_client.Model;
 using user_client.ViewModel;
 
@@ -71,8 +73,13 @@ namespace user_client.View
                     System.Windows.MessageBox.Show("게시글 정보 없음");
                     return;
                 }
-
-                string connStr = "server=localhost;database=mydb;user=root;password=1234;"; // 환경변수 대체
+                Env.Load();
+                string? host = Environment.GetEnvironmentVariable("DB_HOST");
+                string? port = Environment.GetEnvironmentVariable("DB_PORT");
+                string? name = Environment.GetEnvironmentVariable("DB_NAME");
+                string? uid = Environment.GetEnvironmentVariable("DB_UID");
+                string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
+                string connStr = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";// 환경변수 대체
                 using (var connection = new MySqlConnection(connStr))
                 {
                     connection.Open();
@@ -88,7 +95,20 @@ namespace user_client.View
                 var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
                 if (mainWindow != null)
                 {
-                    mainWindow.Content = new PostListControl(sharedViewModel); // ViewModel 공유
+                    sharedViewModel.LoadPosts();
+                    mainWindow.NavigateToPostList();
+                    if (mainWindow.ContentArea.Children[0] is PostListControl postListControl)
+                    {
+                        // 기존 View 재사용 시 강제로 UI를 Refresh
+                        postListControl.DataContext = null;
+                        postListControl.DataContext = sharedViewModel;
+                    }
+                    else
+                    {
+                        mainWindow.ContentArea.Children.Clear();
+                        mainWindow.ContentArea.Children.Add(new PostListControl(sharedViewModel));
+                    }
+
                 }
             }
             catch (Exception ex)

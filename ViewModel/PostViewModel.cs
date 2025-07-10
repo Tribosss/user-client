@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using user_client.Model;
-
+using MySql.Data.MySqlClient;
+using DotNetEnv;
 
 namespace user_client.ViewModel
     {
@@ -49,7 +50,7 @@ namespace user_client.ViewModel
         }
         public void AddPost(Post post)
         {
-            AllPosts.Insert(0, post); // 또는 Add(post) 후 정렬해도 됨
+            AllPosts.Insert(0, post);
             OnPropertyChanged(nameof(AllPosts));
             CurrentPage = TotalPages;
             UpdatePostsForCurrentPage();
@@ -88,6 +89,51 @@ namespace user_client.ViewModel
             {
                 CurrentPage--;
                 UpdatePostsForCurrentPage();
+            }
+        }
+        public void LoadPosts()
+        {
+            AllPosts.Clear();
+
+            try
+            {
+                Env.Load();
+                string host = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+                string port = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
+                string name = Environment.GetEnvironmentVariable("DB_NAME") ?? "your_db";
+                string uid = Environment.GetEnvironmentVariable("DB_UID") ?? "root";
+                string pwd = Environment.GetEnvironmentVariable("DB_PWD") ?? "";
+
+                string connStr = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
+
+                using (var connection = new MySqlConnection(connStr))
+                {
+                    connection.Open();
+                    string query = "SELECT * FROM posts ORDER BY Id DESC";
+                    using (var cmd = new MySqlCommand(query, connection))
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var post = new Post
+                            {
+                                Id = reader.GetInt32("Id"),
+                                Title = reader.GetString("Title"),
+                                Body = reader.GetString("Body"),
+                                Type = reader.GetString("Type"),
+                                Date = reader.GetDateTime("created_at")
+                            };
+                            AllPosts.Add(post);
+                        }
+                    }
+                }
+
+                CurrentPage = 1;
+                UpdatePostsForCurrentPage();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("게시글 로딩 오류: " + ex.Message);
             }
         }
         public event PropertyChangedEventHandler? PropertyChanged;

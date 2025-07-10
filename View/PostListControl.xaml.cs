@@ -73,7 +73,7 @@ namespace user_client.View
                 {
                     connection.Open();
 
-                    string selectQuery = "SELECT Title, Body, created_at, Author, Type FROM posts ORDER BY created_at DESC;";
+                    string selectQuery = "SELECT Id, Title, Body, created_at, Author, Type FROM posts ORDER BY created_at DESC;";
                     MySqlCommand selectCmd = new MySqlCommand(selectQuery, connection);
                     MySqlDataReader rdr = selectCmd.ExecuteReader();
 
@@ -83,6 +83,7 @@ namespace user_client.View
                     {
                         Post post = new Post
                         {
+                            Id = rdr.GetInt32("Id"),
                             Title = rdr.GetString("Title"),
                             Body = rdr.GetString("Body"),
                             Date = rdr.GetDateTime("created_at"),
