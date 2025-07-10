@@ -1,24 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using WpfApp;
+using MySql.Data.MySqlClient; // DB 연결을 위한 네임스페이스 추가
+using DotNetEnv;              // .env에서 DB 환경변수 로드용
 
 namespace user_client.View
 {
-    /// <summary>
-    /// Interaction logic for SignInControl.xaml
-    /// </summary>
     public partial class SignInControl : System.Windows.Controls.UserControl
     {
         public event Action? GotoSignUpEvt;
@@ -27,6 +15,7 @@ namespace user_client.View
         public SignInControl()
         {
             InitializeComponent();
+            Env.Load(); // .env 파일 로딩
         }
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
@@ -41,24 +30,57 @@ namespace user_client.View
                 return;
             }
 
+            // DB 접속 정보 읽기
+            string? host = Environment.GetEnvironmentVariable("DB_HOST");
+            string? port = Environment.GetEnvironmentVariable("DB_PORT");
+            string? uid = Environment.GetEnvironmentVariable("DB_UID");
+            string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
+            string? dbname = Environment.GetEnvironmentVariable("DB_NAME");
 
-            bool loginSuccess = (loginId == "12345678" && password == "password123");
+            string connStr = $"Server={host};Port={port};Database={dbname};Uid={uid};Pwd={pwd}";
 
-            if (loginSuccess)
+            using (MySqlConnection conn = new MySqlConnection(connStr))
             {
-                LoginErrorText.Visibility = Visibility.Collapsed;
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT password FROM employees WHERE id = @id";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", loginId);
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                string dbPassword = reader.GetString("password");
 
-
-                System.Windows.MessageBox.Show("로그인 성공!");
-                SuccessSignInEvt?.Invoke();
-            }
-            else
-            {
-                LoginErrorText.Text = "사번 또는 비밀번호가 잘못되었습니다.";
-                LoginErrorText.Visibility = Visibility.Visible;
+                                if (password == dbPassword) // 비밀번호 일치 여부 확인
+                                {
+                                    LoginErrorText.Visibility = Visibility.Collapsed;
+                                    System.Windows.MessageBox.Show("로그인 성공!");
+                                    SuccessSignInEvt?.Invoke(); // 로그인 성공 이벤트 호출
+                                }
+                                else
+                                {
+                                    LoginErrorText.Text = "비밀번호가 틀렸습니다.";
+                                    LoginErrorText.Visibility = Visibility.Visible;
+                                }
+                            }
+                            else
+                            {
+                                LoginErrorText.Text = "존재하지 않는 사번입니다.";
+                                LoginErrorText.Visibility = Visibility.Visible;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LoginErrorText.Text = "DB 연결 오류: " + ex.Message;
+                    LoginErrorText.Visibility = Visibility.Visible;
+                }
             }
         }
-
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
@@ -67,11 +89,11 @@ namespace user_client.View
                 : Visibility.Collapsed;
         }
 
-
         private void GoToSignUp_Click(object sender, MouseButtonEventArgs e)
         {
             GotoSignUpEvt?.Invoke();
         }
+
         private void LoginIdBox_GotFocus(object sender, RoutedEventArgs e)
         {
             LoginIdPlaceholder.Visibility = Visibility.Collapsed;
@@ -84,6 +106,7 @@ namespace user_client.View
                 LoginIdPlaceholder.Visibility = Visibility.Visible;
             }
         }
+
         private void PasswordBox_GotFocus(object sender, RoutedEventArgs e)
         {
             PasswordPlaceholder.Visibility = Visibility.Collapsed;
@@ -96,6 +119,5 @@ namespace user_client.View
                 PasswordPlaceholder.Visibility = Visibility.Visible;
             }
         }
-
     }
 }

@@ -1,6 +1,5 @@
 ﻿using DotNetEnv;
 using MySql.Data.MySqlClient;
-using Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;

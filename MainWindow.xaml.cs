@@ -26,9 +26,11 @@ namespace user_client
             // 디바이스 초기화 및 시작
             InitializeDevice();
 
-            SignUpControl control = new SignUpControl();
-            control.GotoSignInEvt += HandleGotoSignInControl;
-            RootGrid.Children.Add(new SignUpControl());
+            var signInView = new SignInControl();
+            signInView.GotoSignUpEvt += HandleGotoSignInControl;
+            signInView.SuccessSignInEvt += InitializePostListControl;
+            RootGrid.Children.Add(signInView);
+
         }
 
         private void InitializeDevice()
