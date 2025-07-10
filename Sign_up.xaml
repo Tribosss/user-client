@@ -2,32 +2,5 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="회원가입" Height="300" Width="300">
-    <StackPanel Margin="20" VerticalAlignment="Center">
 
-        <TextBlock Text="사원 번호" Margin="0,0,0,5"/>
-        <TextBox x:Name="SB" Width="200" Height="25" Margin="0,0,0,10"/>
-
-        <TextBlock Text="비밀번호" Margin="0,0,0,5"/>
-        <PasswordBox x:Name="PW" Width="200" Height="25" Margin="0,0,0,10"/>
-
-        <TextBlock Text="비밀번호 확인" Margin="0,0,0,5"/>
-        <PasswordBox x:Name="PW2" Width="200" Height="25" Margin="0,0,0,10"/>
-
-        <TextBlock x:Name="WarningText" 
-                   Text=""
-                   Foreground="Red"
-                   Visibility="Collapsed"
-                   Margin="0,0,0,10"/>
-        
-
-
-        <Button Content="가입 요청하기" Width="200" Click="ButtonAddName_Click"/>
-
-        <TextBlock Text="기존 사원이라면? 로그인 하러 가기"
-                    Foreground="#AAAAAA"
-                    FontSize="11"
-                    HorizontalAlignment="Center"
-                    Cursor="Hand"
-                    MouseDown="GoToLogin_Click"/>
-    </StackPanel>
 </Window>

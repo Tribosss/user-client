@@ -8,7 +8,6 @@ using System.Text;
 using System.Windows;
 using user_client.Model;
 using user_client.View;
-using System.Windows.Forms; // NotifyIcon 클래스 추가
 
 namespace user_client
 {
@@ -27,8 +26,9 @@ namespace user_client
             // 디바이스 초기화 및 시작
             InitializeDevice();
 
-            // PostListControl 초기화
-            InitializePostListControl();
+            SignUpControl control = new SignUpControl();
+            control.GotoSignInEvt += HandleGotoSignInControl;
+            RootGrid.Children.Add(new SignUpControl());
         }
 
         private void InitializeDevice()
@@ -39,6 +39,21 @@ namespace user_client
             device.Open();
             device.OnPacketArrival += Device_OnPacketArrival;
             device.StartCapture();
+        }
+        private void HandleGotoSignInControl()
+        {
+            RootGrid.Children.Clear();
+            SignInControl control = new SignInControl();
+            control.GotoSignUpEvt += HandleGotoSignUpControl;
+            control.SuccessSignInEvt += InitializePostListControl;
+            RootGrid.Children.Add(control);
+        }
+        private void HandleGotoSignUpControl()
+        {
+            RootGrid.Children.Clear();
+            SignUpControl control = new SignUpControl();
+            control.GotoSignInEvt += HandleGotoSignInControl;
+            RootGrid.Children.Add(control);
         }
 
         private void InitializePostListControl()
@@ -58,7 +73,7 @@ namespace user_client
 
         private void HandleCreateEvent()
         {
-            var createPostControl = new CreatePostControl();
+            CreatePostControl createPostControl = new CreatePostControl();
 
             createPostControl.PostCreated += newPost =>
             {
