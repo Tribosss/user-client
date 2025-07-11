@@ -33,6 +33,7 @@
   <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="MySql.Data" Version="9.3.0" />
+    <PackageReference Include="Opt.Net" Version="0.1.0.48" />
     <PackageReference Include="SharpPcap" Version="6.3.1" />
   </ItemGroup>
 
