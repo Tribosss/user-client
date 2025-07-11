@@ -16,7 +16,12 @@
 		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	    </Content>
     </ItemGroup>
-
+<ItemGroup>
+  <!-- Agent 폴더 이하 모든 파일을 Content로 포함하고 출력 디렉토리에 복사 -->
+  <Content Include="Agent\**\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
   <ItemGroup>
     <COMReference Include="{215d64d2-031c-33c7-96e3-61794cd1ee61}">
       <WrapperTool>tlbimp</WrapperTool>

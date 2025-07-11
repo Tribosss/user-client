@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -13,9 +14,7 @@ namespace user_client
 {
     public partial class MainWindow : Window
     {
-        // 임시 키워드
-        private readonly string[] _keywords = { "HelloWorld", "Hello", "yessss" };
-
+        private Process _agentProc;
         public MainWindow()
         {
             InitializeComponent();
@@ -23,9 +22,24 @@ namespace user_client
             // 트레이 초기화
             InitTray();
 
-            SignUpControl control = new SignUpControl();
-            control.GotoSignInEvt += HandleGotoSignInControl;
-            RootGrid.Children.Add(new SignUpControl());
+            HandleGotoSignInControl();
+        }
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (_agentProc == null || _agentProc.HasExited) return;
+            _agentProc.Kill();
+        }
+
+        private void StartAgent(string empId)
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = Path.Combine(baseDir, "Agent", "PacketFlowMonitor.exe"),
+                Arguments = empId,
+                UseShellExecute = true,
+            };
+            _agentProc = Process.Start(startInfo);
         }
 
         private void HandleGotoSignInControl()
@@ -33,7 +47,7 @@ namespace user_client
             RootGrid.Children.Clear();
             SignInControl control = new SignInControl();
             control.GotoSignUpEvt += HandleGotoSignUpControl;
-            control.SuccessSignInEvt += InitializePostListControl;
+            control.SuccessSignInEvt += SuccessSignIn;
             RootGrid.Children.Add(control);
         }
         private void HandleGotoSignUpControl()
@@ -44,7 +58,13 @@ namespace user_client
             RootGrid.Children.Add(control);
         }
 
-        private void InitializePostListControl()
+        private void SuccessSignIn(string empId)
+        {
+            StartAgent(empId);
+            HandlePostListControl();
+        }
+
+        private void HandlePostListControl()
         {
             PostListControl postListControl = new PostListControl();
 

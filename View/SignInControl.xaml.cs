@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +19,7 @@ namespace user_client.View
     public partial class SignInControl : System.Windows.Controls.UserControl
     {
         public event Action? GotoSignUpEvt;
-        public event Action? SuccessSignInEvt;
+        public event Action<string>? SuccessSignInEvt;
 
         public SignInControl()
         {
@@ -45,7 +47,7 @@ namespace user_client.View
 
 
                 System.Windows.MessageBox.Show("로그인 성공!");
-                SuccessSignInEvt?.Invoke();
+                SuccessSignInEvt?.Invoke(loginId);
             }
             else
             {

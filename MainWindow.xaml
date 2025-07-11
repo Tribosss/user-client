@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:user_client"
         mc:Ignorable="d"
+        Closing="MainWindow_Closing"
         Title="MainWindow" Height="450" Width="800">
     <Grid Name="RootGrid">
         
