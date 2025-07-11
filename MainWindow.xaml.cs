@@ -12,7 +12,6 @@ using user_client.Model;
 using user_client.View;
 using user_client.ViewModel;
 
-
 namespace user_client
 {
     public partial class MainWindow : Window
@@ -27,15 +26,18 @@ namespace user_client
         {
             
             InitializeComponent();
-            NavigateToPostList();
+            //NavigateToPostList();
             // 트레이 초기화
             InitTray();
 
             // 디바이스 초기화 및 시작
             InitializeDevice();
 
-            // PostListControl 초기화
-            InitializePostListControl();
+            var signInView = new SignInControl();
+            signInView.GotoSignUpEvt += HandleGotoSignInControl;
+            signInView.SuccessSignInEvt += InitializePostListControl;
+            ContentArea.Children.Add(signInView);
+
         }
         private void HomeButton_Click(object sender, RoutedEventArgs e)
         {
@@ -60,16 +62,32 @@ namespace user_client
         }
         private void InitializeDevice()
         {
-            LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[4];
+            LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[6];
             
             Console.WriteLine(device.ToString());
             device.Open();
             device.OnPacketArrival += Device_OnPacketArrival;
             device.StartCapture();
         }
+        private void HandleGotoSignInControl()
+        {
+            RootGrid.Children.Clear();
+            SignInControl control = new SignInControl();
+            control.GotoSignUpEvt += HandleGotoSignUpControl;
+            control.SuccessSignInEvt += InitializePostListControl;
+            ContentArea.Children.Add(control);
+        }
+        private void HandleGotoSignUpControl()
+        {
+            ContentArea.Children.Clear();
+            SignUpControl control = new SignUpControl();
+            control.GotoSignInEvt += HandleGotoSignInControl;
+            ContentArea.Children.Add(control);
+        }
 
         private void InitializePostListControl()
         {
+            ContentArea.Children.Clear();
             PostListControl postListControl = new PostListControl(_sharedViewModel);
 
             // 이벤트 연결
@@ -85,7 +103,7 @@ namespace user_client
 
         private void HandleCreateEvent()
         {
-            var createPostControl = new CreatePostControl();
+            CreatePostControl createPostControl = new CreatePostControl();
 
             createPostControl.PostCreated += newPost =>
             {
@@ -208,6 +226,8 @@ namespace user_client
                         DestPort = destPort,
                         DetectedAt = now,
                     };
+
+
                     insertSuspicionLog(detectedLog);
 
                     break;
@@ -219,7 +239,7 @@ namespace user_client
             }
         }
 
-        void insertSuspicionLog(SuspicionLog log)
+        private void insertSuspicionLog(SuspicionLog log)
         {
             try {
                 Env.Load();
