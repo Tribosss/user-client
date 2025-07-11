@@ -17,7 +17,6 @@
 	    </Content>
     </ItemGroup>
 <ItemGroup>
-  <!-- Agent 폴더 이하 모든 파일을 Content로 포함하고 출력 디렉토리에 복사 -->
   <Content Include="Agent\**\*">
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
   </Content>

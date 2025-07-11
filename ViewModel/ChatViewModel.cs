@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace user_client.Model
 {
-    internal class ChatClient
+    internal class ChatViewModel
     {
         TcpClient client = null;
         Thread receiveMessageThread = null;
@@ -65,12 +65,6 @@ namespace user_client.Model
                             ReceiveMessageView();
                             break;
                         }
-                        //case ChatStaticDefine.EXIT:
-                        //    {
-                        //        if (client != null) client.Close();
-                        //        receiveMessageThread.Abort();
-                        //        return;
-                        //    }
                 }
             }
 

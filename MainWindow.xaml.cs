@@ -7,8 +7,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using user_client.Model;
 using user_client.View;
+using user_client.View.Chat;
 
 namespace user_client
 {
@@ -19,7 +21,6 @@ namespace user_client
         {
             InitializeComponent();
 
-            // 트레이 초기화
             InitTray();
 
             HandleGotoSignInControl();
@@ -28,6 +29,13 @@ namespace user_client
         {
             if (_agentProc == null || _agentProc.HasExited) return;
             _agentProc.Kill();
+        }
+
+        private void HandleShowChatUserList(string empId)
+        {
+            ChatUserListWindow window = new ChatUserListWindow(empId);
+            window.Owner = this;
+            window.Show();
         }
 
         private void StartAgent(string empId)
@@ -71,7 +79,6 @@ namespace user_client
             // 이벤트 연결
             postListControl.CreateEvent += HandleCreateEvent;
             postListControl.SelectPostEvent += HandleSelectPost;
-            postListControl.GotoChatEvnt += HandleGotoChatView;
             
 
             // RootGrid에 추가
@@ -97,12 +104,6 @@ namespace user_client
             RootGrid.Children.Clear();
             RootGrid.Children.Add(new PostDetailControl(post));
         }
-        private void HandleGotoChatView()
-        {
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new ChatControl());
-        }
-
         private void InitTray()
         {
             // 트레이 초기 설정
