@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls.Primitives;
+using user_client.Components;
 using user_client.Model;
 using user_client.View;
 using user_client.View.Chat;
@@ -29,13 +30,6 @@ namespace user_client
         {
             if (_agentProc == null || _agentProc.HasExited) return;
             _agentProc.Kill();
-        }
-
-        private void HandleShowChatUserList(string empId)
-        {
-            ChatUserListWindow window = new ChatUserListWindow(empId);
-            window.Owner = this;
-            window.Show();
         }
 
         private void StartAgent(string empId)
@@ -66,10 +60,29 @@ namespace user_client
             RootGrid.Children.Add(control);
         }
 
-        private void SuccessSignIn(string empId)
+        private void SuccessSignIn(UserData uData)
         {
-            StartAgent(empId);
-            HandlePostListControl();
+            StartAgent(uData.Id);
+
+            PostListControl postListControl = new PostListControl();
+            postListControl.CreateEvent += HandleCreateEvent;
+            postListControl.SelectPostEvent += HandleSelectPost;
+
+            SideBarControl snb = new SideBarControl(uData);
+            snb.BoardNavigateEvt += HandlePostListControl;
+            snb.PolicyRequestNavigateEvt += () => { };
+            snb.ShowChatWindowEvt += HandleShowChatUserList;
+
+            RootGrid.Children.Clear();
+            RootGrid.Children.Add(snb);
+            RootGrid.Children.Add(postListControl);
+        }
+
+        private void HandleShowChatUserList(string empId)
+        {
+            ChatUserListWindow window = new ChatUserListWindow(empId);
+            window.Owner = this;
+            window.Show();
         }
 
         private void HandlePostListControl()
@@ -82,7 +95,7 @@ namespace user_client
             
 
             // RootGrid에 추가
-            RootGrid.Children.Clear();
+            RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(postListControl);
         }
 

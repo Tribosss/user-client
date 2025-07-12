@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DotNetEnv;
+using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using user_client.Model;
 
 namespace user_client.View
 {
@@ -19,7 +22,7 @@ namespace user_client.View
     public partial class SignInControl : System.Windows.Controls.UserControl
     {
         public event Action? GotoSignUpEvt;
-        public event Action<string>? SuccessSignInEvt;
+        public event Action<UserData>? SuccessSignInEvt;
 
         public SignInControl()
         {
@@ -47,7 +50,9 @@ namespace user_client.View
 
 
                 System.Windows.MessageBox.Show("로그인 성공!");
-                SuccessSignInEvt?.Invoke(loginId);
+                UserData uData = GetUserData(loginId);
+                if (uData == null) throw new Exception("로그인 정보를 찾을 수 없습니다");
+                SuccessSignInEvt?.Invoke(uData!);
             }
             else
             {
@@ -94,5 +99,66 @@ namespace user_client.View
             }
         }
 
+        private UserData? GetUserData(string empId)
+        {
+            string query = $"select e.id, e.name, r.position, e.phone, e.address, e.age " +
+                $"from employees e " +
+                $"inner join role r on r.id=e.role_id " +
+                $"where e.id='{empId}';";
+
+            string? host, port, uid, pwd, name;
+            string dbConnection;
+            UserData uData = new UserData();
+            try
+            {
+                Env.Load();
+
+
+                host = Environment.GetEnvironmentVariable("DB_HOST");
+                if (host == null) throw new Exception(".env DB_HOST is null");
+                port = Environment.GetEnvironmentVariable("DB_PORT");
+                if (port == null) throw new Exception(".env DB_PORT is null");
+                uid = Environment.GetEnvironmentVariable("DB_UID");
+                if (uid == null) throw new Exception(".env DB_UID is null"); ;
+                pwd = Environment.GetEnvironmentVariable("DB_PWD");
+                if (pwd == null) throw new Exception(".env DB_PWD is null");
+                name = Environment.GetEnvironmentVariable("DB_NAME");
+                if (name == null) throw new Exception(".env DB_NAME is null");
+
+                dbConnection = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
+
+                using (MySqlConnection connection = new MySqlConnection(dbConnection))
+                {
+                    connection.Open();
+
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+                    MySqlDataReader rdr = cmd.ExecuteReader();
+                    if (rdr == null) return null;
+                    if (!rdr.Read()) return null;
+
+                    while (rdr.Read())
+                    {
+                        uData = new UserData()
+                        {
+                            Id = rdr[0].ToString(),
+                            Name = rdr[1].ToString(),
+                            Position = rdr[2].ToString() == "ADMIN" ? "관리자" : "사원",
+                            Phone = rdr[3].ToString(),
+                            Address = rdr[4].ToString(),
+                            Age = Int32.Parse(rdr[5].ToString()),
+                        };
+                    }
+
+                    connection.Close();
+                    return uData;
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                return null;
+            }
+        }
     }
 }
