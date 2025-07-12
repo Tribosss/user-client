@@ -12,6 +12,7 @@ using user_client.Model;
 using user_client.View;
 using user_client.ViewModel;
 
+
 namespace user_client
 {
     public partial class MainWindow : Window
@@ -26,7 +27,6 @@ namespace user_client
         {
             
             InitializeComponent();
-            //NavigateToPostList();
             // 트레이 초기화
             InitTray();
 
@@ -71,7 +71,7 @@ namespace user_client
         }
         private void HandleGotoSignInControl()
         {
-            RootGrid.Children.Clear();
+            ContentArea.Children.Clear();
             SignInControl control = new SignInControl();
             control.GotoSignUpEvt += HandleGotoSignUpControl;
             control.SuccessSignInEvt += InitializePostListControl;
