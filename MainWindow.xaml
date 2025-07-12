@@ -8,7 +8,6 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid Name="RootGrid">
         <Grid x:Name="ContentArea" Margin="0,50,0,0"/>
-        <ContentControl x:Name="MainContentControl" />
-
+        <ContentControl x:Name="MainContent" />
     </Grid>
 </Window>

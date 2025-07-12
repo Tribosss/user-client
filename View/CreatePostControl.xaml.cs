@@ -17,6 +17,8 @@ namespace user_client.View
         public CreatePostControl()
         {
             InitializeComponent();
+            SideMenu.NavigateToListRequested += OnNavigateToListRequested;
+            SideMenu.NavigateToChatRequested += OnNavigateToChatRequested;
         }
         public CreatePostControl(Post postToEdit, bool isEditMode)
         {
@@ -31,6 +33,18 @@ namespace user_client.View
                 BodyTextBox.Text = _editingPost.Body;
                 _originalTitle = _editingPost.Title;
             }
+        }
+        private void OnNavigateToListRequested()
+        {
+            var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
+            mainWindow?.NavigateToPostList();
+        }
+
+        private void OnNavigateToChatRequested()
+        {
+            var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
+            mainWindow?.ContentArea.Children.Clear();
+            mainWindow?.ContentArea.Children.Add(new ChatControl());
         }
         public void InsertPostToDatabase(Post post)
         {

@@ -38,6 +38,21 @@ namespace user_client.View
             _currentPost = selectedPost;
             sharedViewModel = viewModel;
             this.DataContext = selectedPost;
+
+            SideMenu.NavigateToListRequested += OnNavigateToListRequested;
+            SideMenu.NavigateToChatRequested += OnNavigateToChatRequested;
+        }
+        private void OnNavigateToListRequested()
+        {
+            var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
+            mainWindow?.NavigateToPostList();
+        }
+
+        private void OnNavigateToChatRequested()
+        {
+            var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
+            mainWindow?.ContentArea.Children.Clear();
+            mainWindow?.ContentArea.Children.Add(new ChatControl());
         }
         private void BackButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {

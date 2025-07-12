@@ -39,6 +39,21 @@ namespace user_client
             ContentArea.Children.Add(signInView);
 
         }
+        private void ShowSignUp()
+        {
+            var signUp = new SignUpControl();
+            signUp.GotoSignInEvt += () =>
+            {
+                MainContent.Content = new SignInControl();
+            };
+            MainContent.Content = signUp;
+        }
+
+        private void ShowMainApp()
+        {
+            var mainApp = new MainAppControl(_sharedViewModel);
+            MainContent.Content = mainApp;
+        }
         private void HomeButton_Click(object sender, RoutedEventArgs e)
         {
             NavigateToPostList();

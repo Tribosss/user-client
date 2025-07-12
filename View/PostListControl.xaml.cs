@@ -27,6 +27,11 @@ namespace user_client.View
         public event Action<user_client.Model.Post>? SelectPostEvent;
         public event Action? GotoChatEvnt;
         public event Action? CreateEvent;
+        private SideMenuControl _sideMenu;
+        public event Action? NavigateToListRequested;
+        public event Action? NavigateToChatRequested;
+
+
         public PostListControl(PostViewModel sharedViewModel)
         {
             InitializeComponent();
@@ -34,11 +39,38 @@ namespace user_client.View
             _viewModel = sharedViewModel;
             this.DataContext = _viewModel;
 
+            SideMenu.NavigateToListRequested += () => NavigateToListRequested?.Invoke();
+            SideMenu.NavigateToChatRequested += () => NavigateToChatRequested?.Invoke();
+
             LoadPostsFromDatabase();
+        }
+        private void SideMenu_NavigateToListRequested()
+        {
+            // 게시판 버튼 눌렀을 때 동작할 내용 (보통 현재 PostListControl이니 별도 처리 안 해도 될 수도)
+            // 하지만 MainWindow로 넘겨서 화면 전환을 원하면 아래처럼 호출
+
+            var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
+            mainWindow?.NavigateToPostList();
+        }
+
+        private void SideMenu_NavigateToChatRequested()
+        {
+            // 채팅 버튼 눌렀을 때 처리
+            var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
+            mainWindow?.ContentArea.Children.Clear();
+            mainWindow?.ContentArea.Children.Add(new ChatControl());
         }
         private void OnPostCreated(Post post)
         {
             _viewModel.AddPost(post); // ViewModel에 추가 + 마지막 페이지 이동
+        }
+        private void HomeButton_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.NavigateToPostList(); // ← MainWindow에 이 메서드가 public이어야 함
+            }
         }
         private void CreateButton_Click(object sender, RoutedEventArgs e)
         {
