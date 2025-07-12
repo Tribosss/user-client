@@ -24,22 +24,6 @@ namespace user_client.ViewModel
         
         private void GetChatUserList(string empId)
         {
-            //string query = "select m.sender_id, e.name, r.position, m.msg, m.created_at " +
-            //    "from chat_messages m " +
-            //    "inner join ( " +
-            //    "   select sender_id, max(created_at) as max_created_at " +
-            //    "   from chat_messages " +
-            //    "   where room_id in (" +
-            //    "       select room_id " +
-            //    "       from chat_members " +
-            //    $"       where emp_id='{empId}'" +
-            //    $"   ) and sender_id!='{empId}' " +
-            //    "   group by sender_id" +
-            //    ") t on m.sender_id=t.sender_id and m.created_at=t.max_created_at " +
-            //    "inner join employees e on e.id=m.sender_id " +
-            //    "inner join role r on r.id=e.role_id " +
-            //    "order by m.created_at asc;";
-
             string query = "select r.id, e.name, role.position, msg.msg, msg.created_at " +
                 "from chat_rooms r " +
                 "inner join chat_members member on member.room_id=r.id " +

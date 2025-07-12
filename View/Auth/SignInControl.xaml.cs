@@ -42,7 +42,7 @@ namespace user_client.View
             }
 
 
-            bool loginSuccess = (loginId == "12345678" && password == "password123");
+            bool loginSuccess = true;
 
             if (loginSuccess)
             {

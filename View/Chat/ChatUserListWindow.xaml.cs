@@ -22,9 +22,13 @@ namespace user_client.View.Chat
     public partial class ChatUserListWindow : Window
     {
         private string _currentEmpId;
+        private ChatClient _cvm { get; set; }
         public ChatUserListWindow(string empId)
         {
             InitializeComponent();
+            _cvm = new ChatClient();
+            _cvm.Init();
+            _cvm.Connect(empId);
             _currentEmpId = empId;
             this.DataContext = new ChatUserListViewModel(empId);
         }
@@ -35,7 +39,7 @@ namespace user_client.View.Chat
             Border border = (Border) sender;
             RecentChat user = (RecentChat)border.DataContext;
 
-            UserChattingWindow chattingWindow = new UserChattingWindow(user, _currentEmpId);
+            UserChattingWindow chattingWindow = new UserChattingWindow(user, _currentEmpId, _cvm);
             chattingWindow.Show();
         }
     }

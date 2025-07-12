@@ -39,7 +39,7 @@ namespace user_client
             {
                 FileName = Path.Combine(baseDir, "Agent", "PacketFlowMonitor.exe"),
                 Arguments = empId,
-                UseShellExecute = true,
+                UseShellExecute = false,
             };
             _agentProc = Process.Start(startInfo);
         }
