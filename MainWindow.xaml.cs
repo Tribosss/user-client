@@ -3,49 +3,53 @@ using MySql.Data.MySqlClient;
 using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls.Primitives;
+using user_client.Components;
 using user_client.Model;
 using user_client.View;
+using user_client.View.Chat;
 
 namespace user_client
 {
     public partial class MainWindow : Window
     {
-        // 임시 키워드
-        private readonly string[] _keywords = { "HelloWorld", "Hello", "yessss" };
-
+        private Process _agentProc;
         public MainWindow()
         {
             InitializeComponent();
 
-            // 트레이 초기화
             InitTray();
 
-            // 디바이스 초기화 및 시작
-            InitializeDevice();
-
-            SignUpControl control = new SignUpControl();
-            control.GotoSignInEvt += HandleGotoSignInControl;
-            RootGrid.Children.Add(new SignUpControl());
+            HandleGotoSignInControl();
         }
-
-        private void InitializeDevice()
+        private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[6];
-            
-            Console.WriteLine(device.ToString());
-            device.Open();
-            device.OnPacketArrival += Device_OnPacketArrival;
-            device.StartCapture();
+            if (_agentProc == null || _agentProc.HasExited) return;
+            _agentProc.Kill();
         }
+
+        private void StartAgent(string empId)
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = Path.Combine(baseDir, "Agent", "PacketFlowMonitor.exe"),
+                Arguments = empId,
+                UseShellExecute = false,
+            };
+            _agentProc = Process.Start(startInfo);
+        }
+
         private void HandleGotoSignInControl()
         {
             RootGrid.Children.Clear();
             SignInControl control = new SignInControl();
             control.GotoSignUpEvt += HandleGotoSignUpControl;
-            control.SuccessSignInEvt += InitializePostListControl;
+            control.SuccessSignInEvt += SuccessSignIn;
             RootGrid.Children.Add(control);
         }
         private void HandleGotoSignUpControl()
@@ -56,18 +60,42 @@ namespace user_client
             RootGrid.Children.Add(control);
         }
 
-        private void InitializePostListControl()
+        private void SuccessSignIn(UserData uData)
+        {
+            StartAgent(uData.Id);
+
+            PostListControl postListControl = new PostListControl();
+            postListControl.CreateEvent += HandleCreateEvent;
+            postListControl.SelectPostEvent += HandleSelectPost;
+
+            SideBarControl snb = new SideBarControl(uData);
+            snb.BoardNavigateEvt += HandlePostListControl;
+            snb.PolicyRequestNavigateEvt += () => { };
+            snb.ShowChatWindowEvt += HandleShowChatUserList;
+
+            RootGrid.Children.Clear();
+            RootGrid.Children.Add(snb);
+            RootGrid.Children.Add(postListControl);
+        }
+
+        private void HandleShowChatUserList(string empId)
+        {
+            ChatUserListWindow window = new ChatUserListWindow(empId);
+            window.Owner = this;
+            window.Show();
+        }
+
+        private void HandlePostListControl()
         {
             PostListControl postListControl = new PostListControl();
 
             // 이벤트 연결
             postListControl.CreateEvent += HandleCreateEvent;
             postListControl.SelectPostEvent += HandleSelectPost;
-            postListControl.GotoChatEvnt += HandleGotoChatView;
             
 
             // RootGrid에 추가
-            RootGrid.Children.Clear();
+            RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(postListControl);
         }
 
@@ -89,12 +117,6 @@ namespace user_client
             RootGrid.Children.Clear();
             RootGrid.Children.Add(new PostDetailControl(post));
         }
-        private void HandleGotoChatView()
-        {
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new ChatControl());
-        }
-
         private void InitTray()
         {
             // 트레이 초기 설정
@@ -119,131 +141,6 @@ namespace user_client
                 this.ShowInTaskbar = true;
                 tray.Visible = false;
             };
-        }
-
-        private void Device_OnPacketArrival(object s, PacketCapture e)
-        {
-            try { 
-                byte[]? payload = null;
-                string sourceIp, destIp;
-                int sourcePort = 0;
-                int destPort = 0;
-                string text;
-
-                byte[] rawBytes = e.GetPacket().Data;
-                LinkLayers linkLayerType = e.GetPacket().LinkLayerType;
-
-                // 패킷 파싱
-                Packet packet = Packet.ParsePacket(linkLayerType, rawBytes);
-
-                EthernetPacket? ether = packet.Extract<EthernetPacket>();
-                if (ether == null) return;
-
-                IPPacket? ip = packet.Extract<IPPacket>();
-                if (ip == null) return;
-                sourceIp = ip.SourceAddress.ToString();
-                destIp = ip.DestinationAddress.ToString();
-
-                // TCP/UDP 분류
-                switch (ip.Protocol)
-                {
-                    case ProtocolType.Udp:
-                        {
-                            UdpPacket udp = packet.Extract<UdpPacket>();
-                            if (udp == null) return;
-                            sourcePort = udp.SourcePort;
-                            destPort = udp.DestinationPort;
-                            payload = udp.PayloadData;
-                            break;
-                        }
-                    case ProtocolType.Tcp:
-                        {
-                            TcpPacket tcp = packet.Extract<TcpPacket>();
-                            sourcePort = tcp.SourcePort;
-                            destPort = tcp.DestinationPort;
-                            payload = tcp.PayloadData;
-                            break;
-                        }
-                }
-
-                if (sourcePort == 3306 || destPort == 3306) return;
-
-                // payload 추출
-                if (payload == null || payload.Length <= 0) return;
-                text = Encoding.ASCII.GetString(payload);
-
-                // 키워드 탐지
-                foreach (string keyword in _keywords)
-                {
-                    if (text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0) continue;
-
-                    Console.WriteLine("======================");
-                    Console.WriteLine($"Detected Keyword: {keyword}");
-                    Console.WriteLine($"payload: {text}");
-
-                    string now = DateTime.Now.ToString("yyyy-MM-dd");
-
-                    SuspicionLog detectedLog = new SuspicionLog
-                    {
-                        Msg = $"Detected Keyword {keyword}",
-                        keyword = keyword,
-                        EmpId = 1234,
-                        SourceIp = sourceIp,
-                        DestIp = destIp,
-                        SourcePort = sourcePort,
-                        DestPort = destPort,
-                        DetectedAt = now,
-                    };
-
-
-                    insertSuspicionLog(detectedLog);
-
-                    break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error processing packet: {ex.Message}");
-            }
-        }
-
-        private void insertSuspicionLog(SuspicionLog log)
-        {
-            try {
-                Env.Load();
-
-                string? host = Environment.GetEnvironmentVariable("DB_HOST");
-                if (host == null) return;
-                string? port = Environment.GetEnvironmentVariable("DB_PORT");
-                if (port == null) return;
-                string? uid = Environment.GetEnvironmentVariable("DB_UID");
-                if (uid == null) return;
-                string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
-                if (pwd == null) return;
-                string? name = Environment.GetEnvironmentVariable("DB_NAME");
-                if (name == null) return;
-
-                string dbConnection = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
-
-                using (MySqlConnection connection = new MySqlConnection(dbConnection))
-                {
-                    connection.Open();
-
-                    string query = "insert into suspicion_logs(msg, emp_id, source_ip, dest_ip, source_port, dest_port, keyword, detected_at) ";
-                    query += $"values ('{log.Msg}', 1, '{log.SourceIp}', '{log.DestIp}', {log.SourcePort}, {log.DestPort}, '{log.keyword}', '{log.DetectedAt}');";
-
-                    MySqlCommand cmd = new MySqlCommand(query, connection);
-
-                    if (cmd.ExecuteNonQuery() == 1) Console.WriteLine("Success Insert");
-                    else Console.WriteLine("Failed Insert");
-
-                    connection.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
         }
     }
 }

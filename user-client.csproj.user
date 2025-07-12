@@ -2,25 +2,28 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
+    <Compile Update="Components\SideBarControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="MainWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="View\ChatControl.xaml.cs">
+    <Compile Update="View\Chat\ChatUserListWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="View\LoginControl.xaml.cs">
+    <Compile Update="View\Chat\UserChattingWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="View\PostDetailControl.xaml.cs">
+    <Compile Update="View\Posts\PostDetailControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="View\PostListControl.xaml.cs">
+    <Compile Update="View\Posts\PostListControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="View\SignInControl.xaml.cs">
+    <Compile Update="View\Auth\SignInControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="View\SignUpControl.xaml.cs">
+    <Compile Update="View\Auth\SignUpControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

@@ -16,7 +16,19 @@
 		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	    </Content>
     </ItemGroup>
-
+<ItemGroup>
+  <Content Include="Agent\**\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
+<ItemGroup>
+  <None Remove="Src\Icon\BoardIcon.png" />
+  <None Remove="Src\Icon\ChatIcon.png" />
+  <None Remove="Src\Icon\CreateUserChatIcon.png" />
+  <None Remove="Src\Icon\PolicyRequestIcon.png" />
+  <None Remove="Src\Icon\Profile.png" />
+  <None Remove="Src\Icon\TribossLogo.png" />
+</ItemGroup>
   <ItemGroup>
     <COMReference Include="{215d64d2-031c-33c7-96e3-61794cd1ee61}">
       <WrapperTool>tlbimp</WrapperTool>
@@ -34,6 +46,27 @@
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="MySql.Data" Version="9.3.0" />
     <PackageReference Include="SharpPcap" Version="6.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Src\Icon\BoardIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Src\Icon\ChatIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Src\Icon\CreateUserChatIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Src\Icon\PolicyRequestIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Src\Icon\Profile.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Src\Icon\TribossLogo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
