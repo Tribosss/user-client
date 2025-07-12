@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using user_client.Model;
 
 namespace user_client.View.Chat
 {
@@ -19,9 +20,15 @@ namespace user_client.View.Chat
     /// </summary>
     public partial class UserChattingWindow : Window
     {
-        public UserChattingWindow()
+        public UserChattingWindow(RecentChat recentChat, string empId)
         {
             InitializeComponent();
+
+        }
+
+        private void GetChattingLogs(string empId, string targetEmpId)
+        {
+
         }
     }
 }

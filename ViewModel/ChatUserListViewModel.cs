@@ -24,21 +24,36 @@ namespace user_client.ViewModel
         
         private void GetChatUserList(string empId)
         {
-            string query = "select m.sender_id, e.name, r.position, m.msg, m.created_at " +
-                "from chat_messages m " +
-                "inner join ( " +
-                "   select sender_id, max(created_at) as max_created_at " +
-                "   from chat_messages " +
-                "   where room_id in (" +
-                "       select room_id " +
-                "       from chat_members " +
-                $"       where emp_id='{empId}'" +
-                $"   ) and sender_id!='{empId}' " +
-                "   group by sender_id" +
-                ") t on m.sender_id=t.sender_id and m.created_at=t.max_created_at " +
-                "inner join employees e on e.id=m.sender_id " +
-                "inner join role r on r.id=e.role_id " +
-                "order by m.created_at asc;";
+            //string query = "select m.sender_id, e.name, r.position, m.msg, m.created_at " +
+            //    "from chat_messages m " +
+            //    "inner join ( " +
+            //    "   select sender_id, max(created_at) as max_created_at " +
+            //    "   from chat_messages " +
+            //    "   where room_id in (" +
+            //    "       select room_id " +
+            //    "       from chat_members " +
+            //    $"       where emp_id='{empId}'" +
+            //    $"   ) and sender_id!='{empId}' " +
+            //    "   group by sender_id" +
+            //    ") t on m.sender_id=t.sender_id and m.created_at=t.max_created_at " +
+            //    "inner join employees e on e.id=m.sender_id " +
+            //    "inner join role r on r.id=e.role_id " +
+            //    "order by m.created_at asc;";
+
+            string query = "select r.id, e.name, role.position, msg.msg, msg.created_at " +
+                "from chat_rooms r " +
+                "inner join chat_members member on member.room_id=r.id " +
+                "inner join chat_messages msg on msg.room_id=r.id " +
+                "inner join employees e on e.id=member.emp_id " +
+                "inner join role on role.id=e.role_id " +
+                "where member.room_id in (" +
+                $"   select room_id from chat_members where emp_id='{empId}'" +
+                ") and member.emp_id!='12345678' and msg.created_at=(" +
+                "   select MAX(created_at)" +
+                "   from chat_messages" +
+                "   where room_id=r.id" +
+                ") " +
+                "order by msg.created_at desc;";
 
             string? host, port, uid, pwd, name;
             string dbConnection;
@@ -68,15 +83,27 @@ namespace user_client.ViewModel
                     MySqlDataReader rdr = cmd.ExecuteReader();
                     if (rdr == null) return;
 
-                    while (rdr.Read()) {
-                        RecentChat recentChat = new RecentChat()
+                    for (int i = 0; rdr.Read(); i++)
+                    {
+                        // 이전 인텍스와 동일한 ROOM
+                        if (i != 0 && RecentChattingUsers[i-1].Id == rdr[0].ToString())
                         {
-                            Id = rdr[0].ToString(),
-                            Name = rdr[1].ToString() + $" [{rdr[2].ToString()}]",
-                            RecentChattingLog = rdr[3].ToString(),
-                            SentAt = rdr[4].ToString(),
-                        };
-                        RecentChattingUsers.Add(recentChat);
+                            RecentChattingUsers[i - 1].Name += rdr[1].ToString() + $"[{rdr[2].ToString()}],";
+                            i--;
+                        }
+                        // 이전 인덱스와 다른 ROOM or idx = 0
+                        else
+                        {
+                            if (i != 0) RecentChattingUsers[i - 1].Name.TrimEnd(',');
+                            RecentChat recentChat = new RecentChat()
+                            {
+                                Id = rdr[0].ToString(),
+                                Name = rdr[1].ToString() + $"[{rdr[2].ToString()}], ",
+                                RecentChattingLog = rdr[3].ToString(),
+                                SentAt = rdr[4].ToString(),
+                            };
+                            RecentChattingUsers.Add(recentChat);
+                        }
                     }
 
                     connection.Close();
