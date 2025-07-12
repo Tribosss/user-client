@@ -8,28 +8,25 @@
         Background="#e1e1e1"
         xmlns:vm="clr-namespace:user_client.ViewModel"
         Title="ChatUserListWindow" Height="670" Width="400">
-    <Window.DataContext>
-        <vm:ChatUserListViewModel />
-    </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <TextBox Width="320" Margin="15 10 0 10" Background="Transparent"></TextBox>
-            <Image Source="/Src/Icon/CreateUserChatIcon.png" Width="40" Margin="15 0 15 0"></Image>
+            <TextBox Width="300" Margin="15 10 0 10" Background="Transparent"></TextBox>
+            <Image Source="/Src/Icon/CreateUserChatIcon.png" Width="40" Margin="18 0 15 0"></Image>
         </StackPanel>
-        <ListBox Grid.Row="1" Width="Auto" Height="Auto" Background="Transparent">
+        <ListBox ItemsSource="{Binding RecentChattingUsers}" Grid.Row="1" Width="Auto" Height="Auto" Background="Transparent">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Border Width="Auto" Height="100" BorderBrush="#B0B0B0" BorderThickness="0 0 0 1" Padding="10">
+                    <Border Width="400"  BorderBrush="#B0B0B0" BorderThickness="0 0 0 1" Padding="10" Margin="-5 0 0 0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="50"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Image Source="/Src/Icon/profile.png"></Image>
+                            <Image Source="/Src/Icon/Profile.png"></Image>
 
                             <StackPanel Grid.Column="1" Margin="10 0 0 0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding Name}"

@@ -13,7 +13,7 @@ namespace user_client.ViewModel
 
     public class ChatUserListViewModel
     {
-        private ObservableCollection<RecentChat> RecentChattingLogs { get; } = new ObservableCollection<RecentChat>();
+        public ObservableCollection<RecentChat> RecentChattingUsers { get; } = new ObservableCollection<RecentChat>();
         private string _currentEmpId;
 
         public ChatUserListViewModel(string empId)
@@ -24,7 +24,7 @@ namespace user_client.ViewModel
         
         private void GetChatUserList(string empId)
         {
-            string query = "select m.sender_id, m.msg, m.created_at " +
+            string query = "select m.sender_id, e.name, r.position, m.msg, m.created_at " +
                 "from chat_messages m " +
                 "inner join ( " +
                 "   select sender_id, max(created_at) as max_created_at " +
@@ -67,17 +67,16 @@ namespace user_client.ViewModel
                     MySqlCommand cmd = new MySqlCommand(query, connection);
                     MySqlDataReader rdr = cmd.ExecuteReader();
                     if (rdr == null) return;
-                    if (!rdr.Read()) return;
 
                     while (rdr.Read()) {
                         RecentChat recentChat = new RecentChat()
                         {
                             Id = rdr[0].ToString(),
-                            Name = rdr[1].ToString() + $"[{rdr[2].ToString()}]",
+                            Name = rdr[1].ToString() + $" [{rdr[2].ToString()}]",
                             RecentChattingLog = rdr[3].ToString(),
                             SentAt = rdr[4].ToString(),
                         };
-                        RecentChattingLogs.Add(recentChat);
+                        RecentChattingUsers.Add(recentChat);
                     }
 
                     connection.Close();

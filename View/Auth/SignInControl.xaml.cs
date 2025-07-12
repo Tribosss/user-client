@@ -134,7 +134,6 @@ namespace user_client.View
                     MySqlCommand cmd = new MySqlCommand(query, connection);
                     MySqlDataReader rdr = cmd.ExecuteReader();
                     if (rdr == null) return null;
-                    if (!rdr.Read()) return null;
 
                     while (rdr.Read())
                     {
