@@ -8,6 +8,106 @@
         Background="#e1e1e1"
         Title="UserChattingWindow" Height="670" Width="400">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="150" />
+        </Grid.RowDefinitions>
 
+        <Grid Grid.Row="0" Height="60">
+            <TextBlock
+                VerticalAlignment="Center"
+                Margin="30 10 0 0"
+                HorizontalAlignment="Left"
+                FontSize="18"
+                TextWrapping="NoWrap"
+                TextTrimming="CharacterEllipsis"
+                Width="200"
+                Name="TargetName">상대방</TextBlock>
+        </Grid>
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding ChatLogs}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="5">
+                        <!-- 세로 방향으로: 1) 보낸 사람, 2) 메시지+시간 -->
+                        <StackPanel Orientation="Vertical" >
+
+                            <!-- 내 메시지일 때만 보이는 부분 -->
+                            <StackPanel Orientation="Vertical"
+                      HorizontalAlignment="Right">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsMine}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <!-- 1) Sender -->
+                                <TextBlock Text="나"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   Foreground="#333333"
+                                   HorizontalAlignment="Right"
+                                   Margin="0,0,0,2"/>
+                                <!-- 2) [Message][Timestamp] -->
+                                <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right">
+                                    <TextBlock Text="{Binding CreatedAt}"
+                                         Margin="0 0 5 0"
+                                         VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="{Binding Message}"
+                                         Padding="10"
+                                         Background="White"
+                                         TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- 상대 메시지일 때만 보이는 부분 -->
+                            <StackPanel Orientation="Vertical"
+                      HorizontalAlignment="Left">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsMine}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <!-- 1) Sender -->
+                                <TextBlock Text="{Binding Sender}"
+                                   FontSize="12"
+                                   FontWeight="Bold"
+                                   Foreground="#333333"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,2"/>
+                                <!-- 2) [Timestamp][Message] -->
+                                <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding Message}"
+                                         Padding="10"
+                                         Background="#A5C7FF"
+                                         TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding CreatedAt}"
+                                         Margin="5 0 0 0"
+                                         VerticalAlignment="Bottom"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Grid Grid.Row="2">
+            <TextBox Width="Auto" Height="150" VerticalAlignment="Bottom"></TextBox>
+            <Button Width="70" FontSize="16" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10" Background="#A5C7FF" BorderThickness="0">전송</Button>
+        </Grid>
     </Grid>
 </Window>
