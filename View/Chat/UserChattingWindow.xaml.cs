@@ -27,7 +27,7 @@ namespace user_client.View.Chat
         private Dictionary<string, string> Users { get; } = new Dictionary<string, string>();
         public ObservableCollection<ChatLog> ChatLogs { get; } = new ObservableCollection<ChatLog>();
         private ChatClient _cvm { get; set; }
-        public UserChattingWindow(RecentChat recentChat, string empId, ChatClient cvm)
+        public UserChattingWindow(ChatUserData recentChat, string empId, ChatClient cvm)
         {
             InitializeComponent();
             _roomId = recentChat.Id;

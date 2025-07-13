@@ -13,17 +13,18 @@ namespace user_client.ViewModel
 
     public class ChatUserListViewModel
     {
-        public ObservableCollection<RecentChat> RecentChattingUsers { get; } = new ObservableCollection<RecentChat>();
+        public ObservableCollection<ChatUserData> RecentChattingUsers { get; } = new ObservableCollection<ChatUserData>();
         private string _currentEmpId;
 
         public ChatUserListViewModel(string empId)
         {
             _currentEmpId = empId;
-            GetChatUserList(empId);
+            LoadChatUserList(empId);
         }
         
-        private void GetChatUserList(string empId)
+        public void LoadChatUserList(string empId)
         {
+            RecentChattingUsers.Clear();
             string query = "select r.id, e.name, role.position, msg.msg, msg.created_at " +
                 "from chat_rooms r " +
                 "inner join chat_members member on member.room_id=r.id " +
@@ -32,7 +33,7 @@ namespace user_client.ViewModel
                 "inner join role on role.id=e.role_id " +
                 "where member.room_id in (" +
                 $"   select room_id from chat_members where emp_id='{empId}'" +
-                ") and member.emp_id!='12345678' and msg.created_at=(" +
+                $") and member.emp_id!='{empId}' and msg.created_at=(" +
                 "   select MAX(created_at)" +
                 "   from chat_messages" +
                 "   where room_id=r.id" +
@@ -79,7 +80,7 @@ namespace user_client.ViewModel
                         else
                         {
                             if (i != 0) RecentChattingUsers[i - 1].Name.TrimEnd(',');
-                            RecentChat recentChat = new RecentChat()
+                            ChatUserData recentChat = new ChatUserData()
                             {
                                 Id = rdr[0].ToString(),
                                 Name = rdr[1].ToString() + $"[{rdr[2].ToString()}], ",
@@ -88,6 +89,7 @@ namespace user_client.ViewModel
                             };
                             RecentChattingUsers.Add(recentChat);
                         }
+                        RecentChattingUsers[RecentChattingUsers.Count - 1].Name.TrimEnd(',');
                     }
 
                     connection.Close();

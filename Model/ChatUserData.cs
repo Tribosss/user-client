@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace user_client.Model
 {
-    public class RecentChat
+    public class ChatUserData
     {
         public string Id { get; set; }
         public string Name { get; set; }
