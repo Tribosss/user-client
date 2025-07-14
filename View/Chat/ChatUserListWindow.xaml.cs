@@ -16,31 +16,37 @@ using user_client.ViewModel;
 
 namespace user_client.View.Chat
 {
-    /// <summary>
-    /// Interaction logic for ChatUserListWindow.xaml
-    /// </summary>
     public partial class ChatUserListWindow : Window
     {
         private string _currentEmpId;
-        private ChatClient _cvm { get; set; }
+        private ChatClient _cli { get; set; }
+        private ChatUserListViewModel _cvm { get; set; }    
         public ChatUserListWindow(string empId)
         {
             InitializeComponent();
-            _cvm = new ChatClient();
-            _cvm.Init();
-            _cvm.Connect(empId);
+            _cli = new ChatClient();
+            _cli.Init();
+            _cli.Connect(empId);
             _currentEmpId = empId;
-            this.DataContext = new ChatUserListViewModel(empId);
+            _cvm = new ChatUserListViewModel(empId);
+            this.DataContext = _cvm;
         }
 
         private void User_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount < 2) return;
             Border border = (Border) sender;
-            RecentChat user = (RecentChat)border.DataContext;
+            ChatUserData user = (ChatUserData)border.DataContext;
 
-            UserChattingWindow chattingWindow = new UserChattingWindow(user, _currentEmpId, _cvm);
+            UserChattingWindow chattingWindow = new UserChattingWindow(user, _currentEmpId, _cli);
             chattingWindow.Show();
+        }
+
+        private void AddChatRoomButton_Click(object sender, RoutedEventArgs e)
+        {
+            AddChatRoomWindow chattingWindow = new AddChatRoomWindow(_currentEmpId, _cli);
+            chattingWindow.ShowDialog();
+            _cvm.LoadChatUserList(_currentEmpId);
         }
     }
 }

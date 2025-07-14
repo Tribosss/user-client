@@ -15,7 +15,9 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <TextBox Width="300" Margin="15 10 0 10" Background="Transparent"></TextBox>
-            <Image Source="/Src/Icon/CreateUserChatIcon.png" Width="40" Margin="18 0 15 0"></Image>
+            <Button Click="AddChatRoomButton_Click" BorderBrush="Transparent">
+                <Image Source="/Src/Icon/CreateUserChatIcon.png" Width="40" Margin="18 0 15 0"></Image>
+            </Button>
         </StackPanel>
         <ItemsControl ItemsSource="{Binding RecentChattingUsers}" Grid.Row="1" Width="Auto" Height="Auto" Background="Transparent">
             
