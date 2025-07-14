@@ -1,49 +1,44 @@
 ﻿using DotNetEnv;
+using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using user_client.Model;
 using user_client.ViewModel;
-using MySql.Data.MySqlClient;
+using user_client.Components; // ✅ SideBarControl 사용을 위한 네임스페이스 추가
 
 namespace user_client.View
 {
     public partial class PostListControl : System.Windows.Controls.UserControl
     {
-
         private readonly PostViewModel _viewModel;
-        public event Action<user_client.Model.Post>? SelectPostEvent;
+        private readonly UserData _userData; // ✅ 로그인 유저 정보 저장
+        private SideBarControl _sideBar;     // ✅ 사이드바 컨트롤 참조
+
+        public event Action<Post>? SelectPostEvent;
         public event Action? GotoChatEvnt;
         public event Action? CreateEvent;
-        private SideMenuControl _sideMenu;
+
         public event Action? NavigateToListRequested;
         public event Action? NavigateToChatRequested;
 
-
-        public PostListControl(PostViewModel sharedViewModel)
+        // ✅ 생성자: ViewModel + 유저 정보 전달 받음
+        public PostListControl(PostViewModel sharedViewModel, UserData userData)
         {
             InitializeComponent();
 
             _viewModel = sharedViewModel;
+            _userData = userData;
             this.DataContext = _viewModel;
 
-            SideMenu.NavigateToListRequested += () => NavigateToListRequested?.Invoke();
-            SideMenu.NavigateToChatRequested += () => NavigateToChatRequested?.Invoke();
+            _sideBar = new SideBarControl(_userData);
+            _sideBar.BoardNavigateEvt += () => NavigateToListRequested?.Invoke();
+            _sideBar.ShowChatWindowEvt += (_) => NavigateToChatRequested?.Invoke();
 
             LoadPostsFromDatabase();
         }
+
         private void SideMenu_NavigateToListRequested()
         {
             // 게시판 버튼 눌렀을 때 동작할 내용 (보통 현재 PostListControl이니 별도 처리 안 해도 될 수도)
@@ -60,10 +55,12 @@ namespace user_client.View
             mainWindow?.ContentArea.Children.Clear();
             mainWindow?.ContentArea.Children.Add(new ChatControl());
         }
+
         private void OnPostCreated(Post post)
         {
             _viewModel.AddPost(post); // ViewModel에 추가 + 마지막 페이지 이동
         }
+
         private void HomeButton_Click(object sender, RoutedEventArgs e)
         {
             var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
@@ -72,18 +69,19 @@ namespace user_client.View
                 mainWindow.NavigateToPostList(); // ← MainWindow에 이 메서드가 public이어야 함
             }
         }
+
         private void CreateButton_Click(object sender, RoutedEventArgs e)
         {
             CreateEvent?.Invoke();
-
         }
+
         private void PostList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-
             Post? selectedPost = _viewModel.SelectedPost;
             if (selectedPost == null) return;
             SelectPostEvent?.Invoke(selectedPost);
         }
+
         public void LoadPostsFromDatabase()
         {
             try
@@ -125,9 +123,9 @@ namespace user_client.View
 
                         _viewModel.AllPosts.Add(post);
                     }
+
                     _viewModel.CurrentPage = 1;
                     _viewModel.UpdatePostsForCurrentPage();
-                    //connection.Close();
                 }
             }
             catch (Exception ex)
@@ -140,6 +138,7 @@ namespace user_client.View
         {
             GotoChatEvnt?.Invoke();
         }
+
         private void PrevPage_Click(object sender, RoutedEventArgs e)
         {
             if (_viewModel.CurrentPage > 1)
@@ -155,6 +154,5 @@ namespace user_client.View
                 _viewModel.CurrentPage++;
             }
         }
-
     }
 }

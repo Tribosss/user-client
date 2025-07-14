@@ -3,27 +3,43 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using user_client.Model;
+using user_client.ViewModel;
 using MySql.Data.MySqlClient;
+using user_client.Components; // ✅ SideBarControl 사용을 위한 네임스페이스
 
 namespace user_client.View
 {
     public partial class CreatePostControl : System.Windows.Controls.UserControl
     {
         public event Action<Post>? PostCreated;
+
+        private readonly PostViewModel _viewModel; // 전달받은 ViewModel
+        private readonly UserData _userData;       // 로그인 사용자 정보
         private bool _isEditMode;
         private Post? _editingPost;
         private string? _originalTitle;
 
-        public CreatePostControl()
-        {
-            InitializeComponent();
-            SideMenu.NavigateToListRequested += OnNavigateToListRequested;
-            SideMenu.NavigateToChatRequested += OnNavigateToChatRequested;
-        }
-        public CreatePostControl(Post postToEdit, bool isEditMode)
+        private SideBarControl _sideBar; // ✅ 사이드바 참조
+
+        // ✅ 새 게시글 작성용 생성자
+        public CreatePostControl(PostViewModel viewModel, UserData userData)
         {
             InitializeComponent();
 
+            _viewModel = viewModel;
+            _userData = userData;
+
+            _sideBar = new SideBarControl(_userData);
+            SideBarPlaceholder.Content = _sideBar;
+
+            _sideBar.BoardNavigateEvt += OnNavigateToListRequested;
+            _sideBar.ShowChatWindowEvt += _ => OnNavigateToChatRequested();
+        }
+
+        // ✅ 게시글 수정용 생성자
+        public CreatePostControl(PostViewModel viewModel, Post postToEdit, bool isEditMode, UserData userData)
+            : this(viewModel, userData)
+        {
             _isEditMode = isEditMode;
             _editingPost = postToEdit;
 
@@ -34,6 +50,7 @@ namespace user_client.View
                 _originalTitle = _editingPost.Title;
             }
         }
+
         private void OnNavigateToListRequested()
         {
             var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
@@ -43,49 +60,7 @@ namespace user_client.View
         private void OnNavigateToChatRequested()
         {
             var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
-            mainWindow?.ContentArea.Children.Clear();
-            mainWindow?.ContentArea.Children.Add(new ChatControl());
-        }
-        public void InsertPostToDatabase(Post post)
-        {
-            try
-            {
-                Env.Load();
-
-                string? host = Environment.GetEnvironmentVariable("DB_HOST");
-                string? port = Environment.GetEnvironmentVariable("DB_PORT");
-                string? uid = Environment.GetEnvironmentVariable("DB_UID");
-                string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
-                string? name = Environment.GetEnvironmentVariable("DB_NAME");
-
-                if (host == null || port == null || uid == null || pwd == null || name == null)
-                    return;
-
-                string dbConnection = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
-
-                using (MySqlConnection connection = new MySqlConnection(dbConnection))
-                {
-                    connection.Open();
-                    string insertQuery = "INSERT INTO posts (Title, Body, created_at, Author, Type) VALUES (@title, @body, @date, @author, @Type)";
-                    MySqlCommand insertCmd = new MySqlCommand(insertQuery, connection);
-                    insertCmd.Parameters.AddWithValue("@title", post.Title);
-                    insertCmd.Parameters.AddWithValue("@body", post.Body);
-                    insertCmd.Parameters.AddWithValue("@date", post.Date);
-                    insertCmd.Parameters.AddWithValue("@author", post.Author ?? "익명");
-                    insertCmd.Parameters.AddWithValue("@Type", post.Type ?? "NORMAL");
-
-                    if (insertCmd.ExecuteNonQuery() == 1)
-                        Console.WriteLine("Success Insert");
-                    else
-                        Console.WriteLine("Failed Insert");
-
-                    connection.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Insert error: " + ex.Message);
-            }
+            mainWindow?.NavigateToChat();
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -109,29 +84,56 @@ namespace user_client.View
                     Title = TitleTextBox.Text,
                     Body = BodyTextBox.Text,
                     Date = DateTime.Now,
-                    Author = "익명",
+                    Author = _userData.Id, // ✅ 로그인한 사용자 ID
                     Type = selectedType
                 };
+
                 InsertPostToDatabase(newPost);
-                var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
-                if (mainWindow != null)
-                {
-                    var viewModel = mainWindow.SharedViewModel;
-                    viewModel.AllPosts.Insert(0, newPost); 
-                    viewModel.CurrentPage = viewModel.TotalPages;
-                }
+
+                _viewModel.AllPosts.Insert(0, newPost);
+                _viewModel.CurrentPage = _viewModel.TotalPages;
+
                 PostCreated?.Invoke(newPost);
             }
         }
 
-        private void HomeButton_Click(object sender, RoutedEventArgs e)
+        public void InsertPostToDatabase(Post post)
         {
-            var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
-            if (mainWindow != null)
+            try
             {
-                mainWindow.NavigateToPostList();
+                Env.Load();
+
+                string? host = Environment.GetEnvironmentVariable("DB_HOST");
+                string? port = Environment.GetEnvironmentVariable("DB_PORT");
+                string? uid = Environment.GetEnvironmentVariable("DB_UID");
+                string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
+                string? name = Environment.GetEnvironmentVariable("DB_NAME");
+
+                if (host == null || port == null || uid == null || pwd == null || name == null)
+                    return;
+
+                string dbConnection = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
+
+                using (var connection = new MySqlConnection(dbConnection))
+                {
+                    connection.Open();
+                    string insertQuery = "INSERT INTO posts (Title, Body, created_at, Author, Type) VALUES (@title, @body, @date, @author, @type)";
+                    var cmd = new MySqlCommand(insertQuery, connection);
+                    cmd.Parameters.AddWithValue("@title", post.Title);
+                    cmd.Parameters.AddWithValue("@body", post.Body);
+                    cmd.Parameters.AddWithValue("@date", post.Date);
+                    cmd.Parameters.AddWithValue("@author", post.Author);
+                    cmd.Parameters.AddWithValue("@type", post.Type);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Insert Error: " + ex.Message);
             }
         }
+
         private void UpdatePostInDatabase(Post post)
         {
             try
@@ -144,35 +146,34 @@ namespace user_client.View
                 string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
                 string? name = Environment.GetEnvironmentVariable("DB_NAME");
 
-                if (host == null || port == null || uid == null || pwd == null || name == null) return;
+                if (host == null || port == null || uid == null || pwd == null || name == null)
+                    return;
 
                 string dbConnection = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
 
-                using (MySqlConnection connection = new MySqlConnection(dbConnection))
+                using (var connection = new MySqlConnection(dbConnection))
                 {
                     connection.Open();
-                    string updateQuery = "UPDATE posts SET Title = @title, Body = @body, Type = @Type WHERE Title = @originalTitle";
-                    MySqlCommand updateCmd = new MySqlCommand(updateQuery, connection);
+                    string updateQuery = "UPDATE posts SET Title = @title, Body = @body, Type = @type WHERE Title = @originalTitle";
+                    var cmd = new MySqlCommand(updateQuery, connection);
+                    cmd.Parameters.AddWithValue("@title", post.Title);
+                    cmd.Parameters.AddWithValue("@body", post.Body);
+                    cmd.Parameters.AddWithValue("@type", post.Type);
+                    cmd.Parameters.AddWithValue("@originalTitle", _originalTitle);
 
-                    updateCmd.Parameters.AddWithValue("@title", post.Title);
-                    updateCmd.Parameters.AddWithValue("@body", post.Body);
-                    updateCmd.Parameters.AddWithValue("@Type", post.Type ?? "NORMAL"); 
-                    updateCmd.Parameters.AddWithValue("@originalTitle", _originalTitle); // 만약 ID 필드가 있다면 ID로 수정 필요
-                    int rowsAffected = updateCmd.ExecuteNonQuery();
-
-                    if (rowsAffected == 1)
-                        Console.WriteLine("Success Update");
-                    else
-                        Console.WriteLine("Failed Update");
-
-                    connection.Close();
+                    cmd.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Update error: " + ex.Message);
+                Console.WriteLine("Update Error: " + ex.Message);
             }
         }
 
+        private void HomeButton_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
+            mainWindow?.NavigateToPostList();
+        }
     }
 }

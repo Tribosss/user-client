@@ -2,21 +2,21 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:user_client.View"
+             xmlns:components="clr-namespace:user_client.Components"
              Height="450" Width="800">
 
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
-            <!-- 사이드메뉴 -->
+            <!-- 사이드바 영역 -->
             <ColumnDefinition Width="*"/>
             <!-- 작성 영역 -->
         </Grid.ColumnDefinitions>
 
-        <!-- 사이드메뉴 -->
-        <local:SideMenuControl Grid.Column="0"/>
-        <local:SideMenuControl x:Name="SideMenu" />
+        <!-- ✅ 사이드바를 코드에서 주입 -->
+        <ContentControl x:Name="SideBarPlaceholder" Grid.Column="0"/>
 
-        <!-- 작성 영역 -->
+        <!-- ✅ 작성 영역 -->
         <Grid Grid.Column="1" Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -27,7 +27,7 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <!-- 사용자 버튼 -->
+            <!-- 👤 사용자 버튼 -->
             <Button Content="👤" 
                     Width="30" Height="30" 
                     FontSize="18" 
@@ -36,7 +36,7 @@
                     Margin="0,30,30,0"
                     Grid.Row="0" Grid.Column="1" />
 
-            <!-- 콤보박스 -->
+            <!-- 📂 콤보박스 -->
             <ComboBox x:Name="TypeComboBox"
                       HorizontalAlignment="Right" 
                       VerticalAlignment="Top" 
@@ -48,7 +48,7 @@
                 <ComboBoxItem Content="NORMAL" />
             </ComboBox>
 
-            <!-- 메인 콘텐츠 -->
+            <!-- ✍️ 글쓰기 영역 -->
             <StackPanel Grid.Row="1" Grid.Column="0">
                 <TextBlock Text="글 제목" FontWeight="Bold" Margin="0,0,0,5" />
                 <TextBox x:Name="TitleTextBox" Height="30" Margin="0,0,0,15" />
@@ -58,6 +58,7 @@
                 <Button Content="저장" Height="40" Width="80" HorizontalAlignment="Center" Click="SaveButton_Click" />
             </StackPanel>
 
+            <!-- 🏠 홈 버튼 -->
             <StackPanel Orientation="Horizontal" 
                         HorizontalAlignment="Left" 
                         VerticalAlignment="Top" 

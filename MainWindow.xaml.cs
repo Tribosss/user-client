@@ -1,157 +1,114 @@
-﻿using DotNetEnv;
-using MySql.Data.MySqlClient;
-using PacketDotNet;
-using PacketDotNet.Ieee80211;
-using SharpPcap;
-using SharpPcap.LibPcap;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
+﻿using System;
 using System.Windows;
 using user_client.Model;
 using user_client.View;
-
+using user_client.ViewModel;
 
 namespace user_client
 {
     public partial class MainWindow : Window
     {
-        // 임시 키워드
-        private readonly string[] _keywords = { "HelloWorld", "Hello", "yessss" };
+        // 로그인된 사용자 정보 저장
+        private UserData _userData;
 
-        public MainWindow()
+        // ViewModel 인스턴스 (Post 관련)
+        private PostViewModel _postViewModel;
+
+        public MainWindow(UserData userData)
         {
             InitializeComponent();
 
-            // 트레이 초기화
-            InitTray();
+            _userData = userData;
+            _postViewModel = new PostViewModel();
 
-            // 디바이스 초기화 및 시작
-            InitializeDevice();
-
-            SignUpControl control = new SignUpControl();
-            control.GotoSignInEvt += HandleGotoSignInControl;
-            RootGrid.Children.Add(new SignUpControl());
+            NavigateToSignIn(); // 앱 시작 시 로그인 화면부터 시작
         }
-        private void ShowSignUp()
+
+        // 로그인 화면으로 이동
+        public void NavigateToSignIn()
+        {
+            var signIn = new SignInControl();
+            signIn.GotoSignUpEvt += NavigateToSignUp;
+            signIn.SuccessSignInEvt += () =>
+            {
+                _userData = signIn.LoggedInUserData;
+                NavigateToPostList();
+            };
+
+            ContentArea.Children.Clear();
+            ContentArea.Children.Add(signIn);
+        }
+
+        // 회원가입 화면으로 이동
+        public void NavigateToSignUp()
         {
             var signUp = new SignUpControl();
-            signUp.GotoSignInEvt += () =>
-            {
-                MainContent.Content = new SignInControl();
-            };
-            MainContent.Content = signUp;
-        }
+            signUp.OnGotoSignIn += NavigateToSignIn;
 
-        private void InitializeDevice()
-        {
-            LibPcapLiveDevice device = LibPcapLiveDeviceList.Instance[6];
-            
-            Console.WriteLine(device.ToString());
-            device.Open();
-            device.OnPacketArrival += Device_OnPacketArrival;
-            device.StartCapture();
-        }
-
-        private void HandleGotoSignInControl()
-        {
             ContentArea.Children.Clear();
-            SignInControl control = new SignInControl();
-            control.GotoSignUpEvt += HandleGotoSignUpControl;
-            control.SuccessSignInEvt += InitializePostListControl;
-            RootGrid.Children.Add(control);
+            ContentArea.Children.Add(signUp);
         }
-        private void HandleGotoSignUpControl()
+
+        // 게시글 리스트 화면으로 이동
+        public void NavigateToPostList()
         {
+            var postList = new PostListControl(_postViewModel, _userData);
+            postList.SelectPostEvent += NavigateToPostDetail;
+            postList.CreateEvent += NavigateToCreatePost;
+            postList.NavigateToListRequested += NavigateToPostList;
+            postList.NavigateToChatRequested += NavigateToChat;
+
             ContentArea.Children.Clear();
-            SignUpControl control = new SignUpControl();
-            control.GotoSignInEvt += HandleGotoSignInControl;
-            ContentArea.Children.Add(control);
+            ContentArea.Children.Add(postList);
         }
 
-        private void SuccessSignIn(UserData uData)
+        // 게시글 상세 화면으로 이동
+        public void NavigateToPostDetail(Post selectedPost)
         {
-            StartAgent(uData.Id);
-
-            PostListControl postListControl = new PostListControl();
-            postListControl.CreateEvent += HandleCreateEvent;
-            postListControl.SelectPostEvent += HandleSelectPost;
-
-            SideBarControl snb = new SideBarControl(uData);
-            snb.BoardNavigateEvt += HandlePostListControl;
-            snb.PolicyRequestNavigateEvt += () => { };
-            snb.ShowChatWindowEvt += HandleShowChatUserList;
-
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(snb);
-            RootGrid.Children.Add(postListControl);
-        }
-
-        private void HandleShowChatUserList(string empId)
-        {
-            PostListControl postListControl = new PostListControl();
-
-            // 이벤트 연결
-            postListControl.CreateEvent += HandleCreateEvent;
-            postListControl.SelectPostEvent += HandleSelectPost;
-            postListControl.GotoChatEvnt += HandleGotoChatView;
-            
-
-            // RootGrid에 추가
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(postListControl);
-        }
-
-        private void HandleCreateEvent()
-        {
-            CreatePostControl createPostControl = new CreatePostControl();
-
-            createPostControl.PostCreated += newPost =>
+            var postDetail = new PostDetailControl(_postViewModel, selectedPost);
+            postDetail.OnBackToList += NavigateToPostList;
+            postDetail.OnEditRequested += () =>
             {
-                _sharedViewModel.Posts.Insert(0, newPost);
-                NavigateToPostDetail(newPost);
+                NavigateToEditPost(selectedPost);
             };
 
             ContentArea.Children.Clear();
-            ContentArea.Children.Add(createPostControl);
+            ContentArea.Children.Add(postDetail);
         }
 
-        private void HandleSelectPost(Post post)
+        // 게시글 작성 화면으로 이동
+        public void NavigateToCreatePost()
         {
-            var postDetailControl = new View.PostDetailControl(post, _sharedViewModel, NavigateToPostList);
+            var create = new CreatePostControl(_postViewModel);
+            create.PostCreated += _ =>
+            {
+                NavigateToPostList();
+            };
+
             ContentArea.Children.Clear();
-            ContentArea.Children.Add(postDetailControl);
-        }
-        private void HandleGotoChatView()
-        {
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new ChatControl());
+            ContentArea.Children.Add(create);
         }
 
-        private void InitTray()
+        // 게시글 수정 화면으로 이동
+        public void NavigateToEditPost(Post post)
         {
-            // 트레이 초기 설정
-            NotifyIcon tray = new NotifyIcon();
-            tray.Icon = Properties.Resources.TribTrayIcon;
-            tray.Visible = true;
-            tray.Text = "Tribosss";
-
-            // 최소화 시 작업표시줄 숨김 & 트레이 표시
-            this.StateChanged += (s, e) =>
+            var edit = new CreatePostControl(_postViewModel, post, true);
+            edit.PostCreated += _ =>
             {
-                if (this.WindowState != WindowState.Minimized) return;
-                this.Hide();
-                this.ShowInTaskbar = false;
+                NavigateToPostList();
             };
 
-            // 트레이 더블클릭 시 작업표시줄 표시 & 트레이 숨김
-            tray.DoubleClick += delegate
-            {
-                this.Show();
-                this.WindowState = WindowState.Normal;
-                this.ShowInTaskbar = true;
-                tray.Visible = false;
-            };
+            ContentArea.Children.Clear();
+            ContentArea.Children.Add(edit);
+        }
+
+        // 채팅 화면으로 이동
+        public void NavigateToChat()
+        {
+            var chat = new ChatControl();
+
+            ContentArea.Children.Clear();
+            ContentArea.Children.Add(chat);
         }
     }
 }
