@@ -12,6 +12,9 @@ using user_client.Components;
 using user_client.Model;
 using user_client.View;
 using user_client.View.Chat;
+using RabbitMQ.Client;
+using System.Threading.Tasks;
+using RabbitMQ.Client.Events;
 
 namespace user_client
 {
@@ -32,7 +35,7 @@ namespace user_client
             _agentProc.Kill();
         }
 
-        private void StartAgent(string empId)
+        private async Task StartAgentAsync(string empId)
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             ProcessStartInfo startInfo = new ProcessStartInfo
@@ -42,6 +45,38 @@ namespace user_client
                 UseShellExecute = false,
             };
             _agentProc = Process.Start(startInfo);
+
+
+            string queueName = $"client_{empId}";
+            ConnectionFactory factory = new ConnectionFactory()
+            {
+                HostName = "localhost",
+                UserName = "guest",
+                Password = "guest",
+                ClientProvidedName = $"[{empId}]"
+            };
+            IConnection conn = await factory.CreateConnectionAsync();
+            IChannel channel = await conn.CreateChannelAsync();
+            await channel.QueueDeclareAsync(queueName, durable: true, exclusive: false, autoDelete: false);
+
+            AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel);
+            consumer.ReceivedAsync += async (model, ea) =>
+            {
+                byte[] body = ea.Body.ToArray();
+                string msg = Encoding.UTF8.GetString(body);
+                Console.WriteLine($"Received: <{msg}>");
+
+                await channel.BasicAckAsync(
+                    deliveryTag: ea.DeliveryTag,
+                    multiple: false
+                );
+            };
+
+            string consumerTag = await channel.BasicConsumeAsync(
+                queue: queueName,
+                autoAck: false,
+                consumer: consumer
+            );
         }
 
         private void HandleGotoSignInControl()
@@ -62,7 +97,7 @@ namespace user_client
 
         private void SuccessSignIn(UserData uData)
         {
-            StartAgent(uData.Id);
+            StartAgentAsync(uData.Id);
 
             PostListControl postListControl = new PostListControl();
             postListControl.CreateEvent += HandleCreateEvent;
