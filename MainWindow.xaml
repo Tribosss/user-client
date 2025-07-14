@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:user_client"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Closing="MainWindow_Closing"
+        Background="#e1e1e1"
+        Title="MainWindow" Height="600" Width="1060">
     <Grid Name="RootGrid">
         <Grid x:Name="ContentArea" Margin="0,50,0,0"/>
         <ContentControl x:Name="MainContent" />

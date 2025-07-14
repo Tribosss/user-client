@@ -5,11 +5,6 @@ VisualStudioVersion = 17.14.36127.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "user-client", "user-client.csproj", "{BA594F9A-02FC-4C14-B90F-4E77CF2776D6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "솔루션 항목", "솔루션 항목", "{2A3A057F-5D22-31FD-628C-DF5EF75AEF1E}"
-	ProjectSection(SolutionItems) = preProject
-		bin\Debug\net9.0-windows\.env = bin\Debug\net9.0-windows\.env
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

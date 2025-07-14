@@ -5,28 +5,7 @@
     <Compile Update="MainWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="View\ChatControl.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="View\LoginControl.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="View\SideMenuControl.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="View\TotpControl.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="View\PostDetailControl.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="View\PostListControl.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="View\SignInControl.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="View\SignUpControl.xaml.cs">
+    <Compile Update="View\Auth\TotpControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

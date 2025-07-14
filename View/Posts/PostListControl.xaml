@@ -1,0 +1,67 @@
+﻿<UserControl x:Class="user_client.View.PostListControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:user_client.View"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:user_client.ViewModel"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1060">
+    <UserControl.DataContext>
+        <vm:PostViewModel />
+    </UserControl.DataContext>
+
+    <Grid Margin="160 0 0 0" Width="900" Height="600">
+        <Frame Name="PostListFrame" Width="900"
+               NavigationUIVisibility="Hidden" />
+        <Button Content="👤" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Top" 
+                Width="30" 
+                Height="30" 
+                FontSize="18" 
+                Margin="0,20,50,0" 
+                Panel.ZIndex="2" />
+        <TextBlock Text="전체 글 보기" FontSize="20" FontWeight="Bold"
+                   Margin="50,40,0,0" />
+        <TextBlock Text="23,349개의 글" FontSize="12"
+                   Margin="50,80,0,0" />
+
+        <!-- 2) 게시글 리스트 영역 -->
+        <Grid Grid.Column="1">
+            <TextBlock Text="전체 글 보기" FontSize="20" FontWeight="Bold" Margin="50,40,0,0" />
+            <TextBlock Text="23,349개의 글" FontSize="12" Margin="50,80,0,0" />
+
+            <Button Content="생성" HorizontalAlignment="Right" VerticalAlignment="Top" 
+                    Width="50" Height="30" Margin="0,20,90,0" FontSize="12" Click="CreateButton_Click" />
+
+            <DataGrid 
+                x:Name="PostList"
+                ItemsSource="{Binding Posts}"
+                SelectedItem="{Binding SelectedPost, Mode=TwoWay}"
+                HorizontalAlignment="Stretch"
+                SelectionMode="Single"
+                AutoGenerateColumns="False"
+                Margin="50,110,50,50"
+                Background="White"
+                RowHeaderWidth="0"
+                MouseDoubleClick="PostList_MouseDoubleClick">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding Type}" Header="분류" Width="1*"/>
+                    <DataGridTextColumn Binding="{Binding Title}" Header="제목" Width="5*"/>
+                    <DataGridTextColumn Binding="{Binding Author}" Header="작성자" Width="2*"/>
+                    <DataGridTextColumn Binding="{Binding Date}" Header="작성일" Width="2*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- 페이지네이션 -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
+                <Button Content="◀" Command="{Binding PreviousPageCommand}" Width="30" Click="PrevPage_Click"/>
+                <TextBlock Text="{Binding CurrentPage}" Margin="10,0" VerticalAlignment="Center"/>
+                <TextBlock Text="/" Margin="2,0"/>
+                <TextBlock Text="{Binding TotalPages}" Margin="2,0" VerticalAlignment="Center"/>
+                <Button Content="▶" Command="{Binding NextPageCommand}" Width="30" Click="NextPage_Click"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
