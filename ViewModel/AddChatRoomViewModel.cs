@@ -130,7 +130,7 @@ namespace user_client.ViewModel
 
                     // 추출된 row가 0 -> 중복된 채팅방이 없으므로 허용
                     if (i == 0) return 1;
-                    // 1 이상일 경우 불허
+                    // 1 이상일 경우 존재하는 채팅방 열기
                     return 2;
                 }
 
@@ -142,13 +142,75 @@ namespace user_client.ViewModel
             }
         }
 
-        public ChatUserData GetRoomIdByUsersId(string empId)
+        public ChatUserData GetRoomIdByUsers(string empId)
+        {
+            string usersStr = $"'{empId}'";
+            foreach (UserData user in SelectedUsers) usersStr += $",'{user.Id}'";
+            string query = $@"
+                select 
+                    room.id, 
+                    group_concat(concat(e.name, '[', role.position,']')  SEPARATOR ', ')
+                    from chat_rooms room 
+                    inner join chat_members m on m.room_id=room.id
+                    inner join employees e on e.id=m.emp_id
+                    inner join role on role.id=e.role_id
+                    where m.emp_id in ({usersStr})
+                    group by room.id 
+                    having 
+                        count(distinct m.emp_id)={SelectedUsers.Count + 1} 
+                        and (select count(id) from chat_members where room_id=room.id)={SelectedUsers.Count + 1};";
+            string? host, port, dbUid, dbPwd, dbName;
+            string dbConnection;
+            try
+            {
+                Env.Load();
+
+                host = Environment.GetEnvironmentVariable("DB_HOST");
+                if (host == null) throw new Exception(".env DB_HOST is null");
+                port = Environment.GetEnvironmentVariable("DB_PORT");
+                if (port == null) throw new Exception(".env DB_PORT is null");
+                dbUid = Environment.GetEnvironmentVariable("DB_UID");
+                if (dbUid == null) throw new Exception(".env DB_UID is null"); ;
+                dbPwd = Environment.GetEnvironmentVariable("DB_PWD");
+                if (dbPwd == null) throw new Exception(".env DB_PWD is null");
+                dbName = Environment.GetEnvironmentVariable("DB_NAME");
+                if (dbName == null) throw new Exception(".env DB_NAME is null");
+
+                dbConnection = $"Server={host};Port={port};Database={dbName};Uid={dbUid};Pwd={dbPwd}";
+
+                using (MySqlConnection connection = new MySqlConnection(dbConnection))
+                {
+                    connection.Open();
+
+                    MySqlCommand cmd = new MySqlCommand(query, connection);
+                    MySqlDataReader rdr = cmd.ExecuteReader();
+                    if (rdr == null) return null;
+                    if (!rdr.Read()) return null;
+
+                    string roomId = rdr[0].ToString();
+                    string name = rdr[1].ToString();
+                    ChatUserData user = new ChatUserData()
+                    {
+                        Id = roomId,
+                        Name = name
+                    };
+
+                    connection.Close();
+                    return user;
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                return null;
+            }
+        }
+
+        public ChatUserData GetRoomIdByUserId(string empId)
         {
             string query = @$"
-                SELECT
-                    cm.room_id,
-                    e.name,
-                    r.position
+                select cm.room_id, e.name, r.position
                 from chat_members AS cm
                 inner join (
                     SELECT room_id
@@ -163,8 +225,6 @@ namespace user_client.ViewModel
                 inner join role r on r.id=e.role_id
                 where e.id='12341234'
                 order by cm.room_id;";
-
-
 
             string? host, port, dbUid, dbPwd, dbName;
             string dbConnection;

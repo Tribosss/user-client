@@ -16,9 +16,6 @@ using user_client.ViewModel;
 
 namespace user_client.View.Chat
 {
-    /// <summary>
-    /// Interaction logic for ChatUserListWindow.xaml
-    /// </summary>
     public partial class ChatUserListWindow : Window
     {
         private string _currentEmpId;

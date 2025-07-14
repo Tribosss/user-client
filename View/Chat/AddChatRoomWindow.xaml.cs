@@ -37,18 +37,23 @@ namespace user_client.View.Chat
         private void AddChatRoomButton_Click(object sender, RoutedEventArgs e)
         {
             int isExistRoom = _vm.IsExistRoom(_currentEmpId);
+            UserChattingWindow window;
             if (isExistRoom == 0 || isExistRoom == -1)
             {
                 Close();
                 return;
             } else if (isExistRoom == 2)
             {
-                ChatUserData user = _vm.GetRoomIdByUsersId(_currentEmpId);
-                UserChattingWindow chattingWindow = new UserChattingWindow(user, _currentEmpId, _cli);
-                chattingWindow.Show();
+                ChatUserData user = _vm.GetRoomIdByUserId(_currentEmpId);
+                window = new UserChattingWindow(user, _currentEmpId, _cli);
+                window.Show();
+                Close();
             }
 
             _vm.AddChatRoom(_currentEmpId);
+            ChatUserData users = _vm.GetRoomIdByUsers(_currentEmpId);
+            window = new UserChattingWindow(users, _currentEmpId, _cli);
+            window.Show();
             Close();
         }
     }
