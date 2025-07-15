@@ -111,7 +111,7 @@ namespace user_client.View
                         parent.Children.Clear();
 
                         // 이벤트 핸들러를 넘겨 SignInControl 생성
-                        var signIn = new SignInControl(SuccessSignInEvt, GotoSignUpEvt); // ✅
+                        var signIn = new SignInControl(SuccessSignInEvt, GotoSignUpEvt); //
                         parent.Children.Add(signIn);
                     }
                 };
