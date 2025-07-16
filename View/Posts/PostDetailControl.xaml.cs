@@ -24,34 +24,36 @@ namespace user_client.View
     /// </summary>
     public partial class PostDetailControl : System.Windows.Controls.UserControl
     {
-        private readonly Action _navigateToPostList;
-        private readonly Post _post;
-        public PostDetailControl(Post post, Action navigateToPostList)
+        public Action NavigatePostList;
+        public Action<Post, PostViewModel> NavigatePostDetail;
+        public Action<PostViewModel?> NavigateCreatePost;
+        public PostViewModel _vm;
+        private Post _post;
+        public Post Post
+        {
+            get => _post;
+            set
+            {
+                if (_post == value) return;
+                _post = value;
+            }
+        }
+
+        public PostDetailControl(Post post, PostViewModel vm)
         {
             InitializeComponent();
-            this.DataContext = post;
-            _navigateToPostList = navigateToPostList;
+            _vm = vm;
             _post = post;
+            this.DataContext = this;
         }
         private void EditButton_Click(object sender, RoutedEventArgs e)
         {
             var createPostControl = new CreatePostControl(_post,true);
 
             // 수정 완료 후 PostDetailControl로 다시 이동
-            createPostControl.PostCreated += updatedPost =>
-            {
-                var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
-                mainWindow.RootGrid.Children.RemoveAt(1);
-                mainWindow.RootGrid.Children.Add(new PostDetailControl(updatedPost, _navigateToPostList));
-                
-            };
+            createPostControl.PostCreated += NavigatePostDetail.Invoke;
 
-            var mw = System.Windows.Application.Current.MainWindow as MainWindow;
-            if (mw != null)
-            {
-                mw.RootGrid.Children.RemoveAt(1);
-                mw?.RootGrid.Children.Add(createPostControl);
-            }
+            NavigateCreatePost?.Invoke(_vm);
         }
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
@@ -84,7 +86,7 @@ namespace user_client.View
 
                 System.Windows.MessageBox.Show("삭제 완료");
 
-                _navigateToPostList?.Invoke();
+                NavigatePostList?.Invoke();
             }
             catch (Exception ex)
             {

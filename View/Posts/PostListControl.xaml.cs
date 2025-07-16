@@ -23,26 +23,21 @@ namespace user_client.View
     public partial class PostListControl : System.Windows.Controls.UserControl
     {
         private readonly PostViewModel _viewModel;
-        public event Action<Post>? SelectPostEvent;
+        public event Action<Post, PostViewModel>? SelectPostEvent;
         public event Action? GotoChatEvnt;
-        public event Action? CreateEvent;
-        public PostViewModel ViewModel => (PostViewModel)DataContext;
+        public event Action<PostViewModel>? CreateEvent;
         public PostListControl()
         {
             InitializeComponent();
-            Loaded += PostListControl_Loaded;
+
             _viewModel = this.DataContext as PostViewModel ?? new PostViewModel();
             this.DataContext = _viewModel;
 
-        }
-        private void PostListControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            ViewModel.LoadPosts();  // ← 게시글 DB에서 로드
+            LoadPostsFromDatabase();
         }
         private void CreateButton_Click(object sender, RoutedEventArgs e)
         {
-            CreateEvent?.Invoke();
-
+            CreateEvent?.Invoke(_viewModel);
         }
         private void PrevPage_Click(object sender, RoutedEventArgs e)
         {
@@ -70,14 +65,13 @@ namespace user_client.View
             if (dataGrid?.SelectedItem is Post selectedPost)
             {
                 // 선택된 게시글이 있으면 이벤트 호출
-                SelectPostEvent?.Invoke(selectedPost);
+                SelectPostEvent?.Invoke(selectedPost, _viewModel);
 
                 // ✅ 선택 상태 초기화 (같은 글을 다시 더블클릭할 수 있도록)
                 dataGrid.SelectedItem = null;
                 _viewModel.SelectedPost = null;
             }
         }
-
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -108,6 +102,7 @@ namespace user_client.View
                     MySqlCommand selectCmd = new MySqlCommand(selectQuery, connection);
                     MySqlDataReader rdr = selectCmd.ExecuteReader();
 
+                    //if (_viewModel)
                     _viewModel.AllPosts.Clear();
 
                     while (rdr.Read())
@@ -126,7 +121,7 @@ namespace user_client.View
                     }
                     _viewModel.CurrentPage = 1;
                     _viewModel.UpdatePostsForCurrentPage();
-                    //connection.Close();
+                    connection.Close();
                 }
             }
             catch (Exception ex)

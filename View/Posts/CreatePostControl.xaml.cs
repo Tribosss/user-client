@@ -4,19 +4,22 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using user_client.Model;
+using user_client.ViewModel;
 
 namespace user_client.View
 {
     public partial class CreatePostControl : System.Windows.Controls.UserControl
     {
-        public event Action<Post>? PostCreated;
+        public event Action<Post, PostViewModel>? PostCreated;
         private bool _isEditMode = false;
         private Post? _editingPost = null;
         private string? _originalTitle;
+        private PostViewModel _vm;
 
-        public CreatePostControl()
+        public CreatePostControl(PostViewModel vm)
         {
             InitializeComponent();
+            _vm = vm;
         }
         public CreatePostControl(Post postToEdit, bool isEditMode)
         {
@@ -61,7 +64,7 @@ namespace user_client.View
                 _editingPost.Type = selectedType;
                 UpdatePostInDatabase(_editingPost);
 
-                PostCreated?.Invoke(_editingPost);
+                PostCreated?.Invoke(_editingPost, _vm);
             }
             else
             {
@@ -74,10 +77,10 @@ namespace user_client.View
                     Type = selectedType
                 };
                 InsertPostToDatabase(newPost);
-                var mainWindow = System.Windows.Application.Current.MainWindow as MainWindow;
-                mainWindow?.SharedViewModel.Posts.Insert(0, newPost);
-                PostCreated?.Invoke(newPost);
-                }
+                
+                _vm.Posts.Insert(0, newPost);
+                PostCreated?.Invoke(newPost, _vm);
+            }
         }
         public void InsertPostToDatabase(Post post)
         {

@@ -19,12 +19,10 @@ namespace user_client
     public partial class MainWindow : Window
     {
         private Process _agentProc;
-        public PostViewModel SharedViewModel { get; private set; }
 
         public MainWindow()
         {
             InitializeComponent();
-            SharedViewModel = new PostViewModel();
             InitTray();
 
             HandleGotoSignInControl();
@@ -33,17 +31,6 @@ namespace user_client
         {
             if (_agentProc == null || _agentProc.HasExited) return;
             _agentProc.Kill();
-        }
-        private void NavigateToPostList()
-        {
-            HandlePostListControl(); // 게시판 목록 화면으로 전환
-        }
-        private void NavigateToPostDetail(Post post)
-        {
-            var postDetailControl = new PostDetailControl(post, NavigateToPostList);
-
-            RootGrid.Children.RemoveAt(1);
-            RootGrid.Children.Add(postDetailControl);
         }
         private void StartAgent(string empId)
         {
@@ -78,11 +65,11 @@ namespace user_client
             StartAgent(uData.Id);
 
             PostListControl postListControl = new PostListControl();
-            postListControl.CreateEvent += HandleCreateEvent;
-            postListControl.SelectPostEvent += HandleSelectPost;
+            postListControl.CreateEvent += HandleNavigateCreatePost;
+            postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
             SideBarControl snb = new SideBarControl(uData);
-            snb.BoardNavigateEvt += HandlePostListControl;
+            snb.BoardNavigateEvt += HandleNavigatePostListControl;
             snb.PolicyRequestNavigateEvt += () => { };
             snb.ShowChatWindowEvt += HandleShowChatUserList;
 
@@ -98,42 +85,41 @@ namespace user_client
             window.Show();
         }
 
-        private void HandlePostListControl()
+        private void HandleNavigatePostListControl()
         {
-            var postListControl = new PostListControl
-            {
-                DataContext = SharedViewModel  // 💡 공통 ViewModel 주입!
-            };
+            var postListControl = new PostListControl();
 
             // 이벤트 연결
-            postListControl.CreateEvent += HandleCreateEvent;
-            postListControl.SelectPostEvent += HandleSelectPost;
-            
+            postListControl.CreateEvent += HandleNavigateCreatePost;
+            postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
             // RootGrid에 추가
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(postListControl);
         }
 
-        private void HandleCreateEvent()
+        private void HandleNavigateCreatePost(PostViewModel pvm)
         {
-            CreatePostControl createPostControl = new CreatePostControl();
+            CreatePostControl createPostControl = new CreatePostControl(pvm);
 
-            createPostControl.PostCreated += updatedPost =>
-            {
-                RootGrid.Children.RemoveAt(1);
-                RootGrid.Children.Add(new PostDetailControl(updatedPost, NavigateToPostList));
-            };
+            createPostControl.PostCreated += HandleNavigatePostDetail;
 
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(createPostControl);
         }
 
-        private void HandleSelectPost(Post post)
+        private void HandleNavigatePostDetail(Post post, PostViewModel pvm)
         {
+            PostDetailControl control = new PostDetailControl(post, pvm);
+
+            control.NavigatePostList += HandleNavigatePostListControl;
+            control.NavigatePostDetail += HandleNavigatePostDetail;
+            control.NavigateCreatePost += HandleNavigateCreatePost;
+
             RootGrid.Children.RemoveAt(1);
-            RootGrid.Children.Add(new PostDetailControl(post, NavigateToPostList)); 
+            RootGrid.Children.Add(control);
         }
+
         private void InitTray()
         {
             // 트레이 초기 설정

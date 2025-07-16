@@ -22,7 +22,7 @@
 
             <!-- 제목 -->
             <TextBlock x:Name="Title"
-                       Text="{Binding Title}"
+                       Text="{Binding Post.Title}"
                        FontSize="20"
                        FontWeight="Bold"
                        Foreground="Black"
@@ -41,7 +41,7 @@
 
                 <!-- 날짜 -->
                 <TextBlock x:Name="Date"
-                           Text="{Binding Date}"
+                           Text="{Binding Post.Date}"
                            FontSize="12"
                            Foreground="Gray"
                            HorizontalAlignment="Right"
@@ -56,7 +56,7 @@
                     </Ellipse.Fill>
                 </Ellipse>
                 <StackPanel>
-                    <TextBlock Text="{Binding Author}" FontWeight="Bold" FontSize="14" Foreground="Black"/>
+                    <TextBlock Text="{Binding Post.Author}" FontWeight="Bold" FontSize="14" Foreground="Black"/>
                     <TextBlock Text="{Binding AuthorPosition}" FontSize="12" Foreground="Gray"/>
                 </StackPanel>
             </StackPanel>
@@ -66,7 +66,7 @@
         <ScrollViewer Grid.Row="1" Margin="30,20,30,30" VerticalScrollBarVisibility="Auto">
             <Border Background="White" Padding="20">
                 <TextBlock x:Name="Body"
-                           Text="{Binding Body}"
+                           Text="{Binding Post.Body}"
                            FontSize="15"
                            TextWrapping="Wrap"
                            Foreground="Black"/>
