@@ -21,6 +21,9 @@ namespace user_client
     public partial class MainWindow : Window
     {
         private Process _agentProc;
+        private IConnection _conn;
+        private IChannel _channel;
+        private string _empId;
         public MainWindow()
         {
             InitializeComponent();
@@ -31,9 +34,17 @@ namespace user_client
         }
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (_agentProc == null || _agentProc.HasExited) return;
-            _agentProc.Kill();
+            KillAgent();
         }
+
+        private void KillAgent()
+        {
+            if (_agentProc == null) return;
+            _agentProc.Kill();
+            _agentProc.Close();
+            Console.WriteLine("Killed Agent");
+        }
+
 
         private async Task StartAgentAsync(string empId)
         {
@@ -45,9 +56,39 @@ namespace user_client
                 UseShellExecute = false,
             };
             _agentProc = Process.Start(startInfo);
+            Console.WriteLine("Started Agent");
 
+            if (_conn != null && _channel != null && _conn.IsOpen && _channel.IsOpen) return;
+            ConnectRabbitServer();
+        }
 
-            string queueName = $"client_{empId}";
+        private void ParseAdminMessage(string msg)
+        {
+            string[] msgs = msg.Split("<");
+            string policyType = msgs[0];
+            string toggle = msgs[1].Split(">")[0];
+
+            switch (policyType) {
+                case "AGENT":
+                    {
+                        if (toggle == "OFF")
+                        {
+                            KillAgent();
+                        } else if (toggle == "ON")
+                        {
+                            StartAgentAsync(_empId);
+                        }
+                        break;
+                    }     
+            }
+
+        }
+
+        private async Task ConnectRabbitServer()
+        {
+            if (_empId == null || string.IsNullOrEmpty(_empId)) return; 
+
+            string queueName = $"client_{_empId}";
             string exchangeName = "tribosss";
             string routingKey = "policy.set";
             ConnectionFactory factory = new ConnectionFactory()
@@ -55,23 +96,23 @@ namespace user_client
                 HostName = "localhost",
                 UserName = "guest",
                 Password = "guest",
-                ClientProvidedName = $"[{empId}]"
+                ClientProvidedName = $"[{_empId}]"
             };
-            IConnection conn = await factory.CreateConnectionAsync();
-            IChannel channel = await conn.CreateChannelAsync();
-            await channel.QueueDeclareAsync(
-                queueName, 
-                durable: true, 
-                exclusive: false, 
+            _conn = await factory.CreateConnectionAsync();
+            _channel = await _conn.CreateChannelAsync();
+            await _channel.QueueDeclareAsync(
+                queueName,
+                durable: true,
+                exclusive: false,
                 autoDelete: false
             );
-            await channel.QueueBindAsync(
+            await _channel.QueueBindAsync(
                 queueName,
                 exchangeName,
                 routingKey,
                 null
             );
-            await channel.ExchangeDeclareAsync(
+            await _channel.ExchangeDeclareAsync(
                 exchangeName,
                 ExchangeType.Direct,
                 durable: true,
@@ -79,23 +120,27 @@ namespace user_client
                 arguments: null
             );
 
-            AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel);
-            consumer.ReceivedAsync += async (model, ea) =>
-            {
-                byte[] body = ea.Body.ToArray();
-                string msg = Encoding.UTF8.GetString(body);
-                Console.WriteLine($"Received: <{msg}>");
+            AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(_channel);
+            consumer.ReceivedAsync += ReceivedMessageAtAdmin;
 
-                await channel.BasicAckAsync(
-                    deliveryTag: ea.DeliveryTag,
-                    multiple: false
-                );
-            };
-
-            string consumerTag = await channel.BasicConsumeAsync(
+            string consumerTag = await _channel.BasicConsumeAsync(
                 queue: queueName,
                 autoAck: false,
                 consumer: consumer
+            );
+        }
+
+        private async Task ReceivedMessageAtAdmin(object model, BasicDeliverEventArgs ea)
+        {
+            byte[] body = ea.Body.ToArray();
+            string msg = Encoding.UTF8.GetString(body);
+            Console.WriteLine($"Received: [{msg}]");
+
+            ParseAdminMessage(msg);
+
+            await _channel.BasicAckAsync(
+                deliveryTag: ea.DeliveryTag,
+                multiple: false
             );
         }
 
@@ -117,6 +162,7 @@ namespace user_client
 
         private void SuccessSignIn(UserData uData)
         {
+            _empId = uData.Id;
             StartAgentAsync(uData.Id);
 
             PostListControl postListControl = new PostListControl();
