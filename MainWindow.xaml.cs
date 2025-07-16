@@ -48,6 +48,8 @@ namespace user_client
 
 
             string queueName = $"client_{empId}";
+            string exchangeName = "tribosss";
+            string routingKey = "policy.set";
             ConnectionFactory factory = new ConnectionFactory()
             {
                 HostName = "localhost",
@@ -57,7 +59,25 @@ namespace user_client
             };
             IConnection conn = await factory.CreateConnectionAsync();
             IChannel channel = await conn.CreateChannelAsync();
-            await channel.QueueDeclareAsync(queueName, durable: true, exclusive: false, autoDelete: false);
+            await channel.QueueDeclareAsync(
+                queueName, 
+                durable: true, 
+                exclusive: false, 
+                autoDelete: false
+            );
+            await channel.QueueBindAsync(
+                queueName,
+                exchangeName,
+                routingKey,
+                null
+            );
+            await channel.ExchangeDeclareAsync(
+                exchangeName,
+                ExchangeType.Direct,
+                durable: true,
+                autoDelete: false,
+                arguments: null
+            );
 
             AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel);
             consumer.ReceivedAsync += async (model, ea) =>
