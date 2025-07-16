@@ -8,6 +8,9 @@
     <Compile Update="MainWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\Auth\TotpControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\Chat\AddChatRoomWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

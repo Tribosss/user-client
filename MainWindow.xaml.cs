@@ -18,14 +18,14 @@ namespace user_client
     public partial class MainWindow : Window
     {
         private Process _agentProc;
+
         public MainWindow()
         {
             InitializeComponent();
-
             InitTray();
-
             HandleGotoSignInControl();
         }
+
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
             if (_agentProc == null || _agentProc.HasExited) return;
@@ -47,11 +47,10 @@ namespace user_client
         private void HandleGotoSignInControl()
         {
             RootGrid.Children.Clear();
-            SignInControl control = new SignInControl();
-            control.GotoSignUpEvt += HandleGotoSignUpControl;
-            control.SuccessSignInEvt += SuccessSignIn;
+            var control = new SignInControl(SuccessSignIn, HandleGotoSignUpControl);
             RootGrid.Children.Add(control);
         }
+
         private void HandleGotoSignUpControl()
         {
             RootGrid.Children.Clear();
@@ -88,13 +87,9 @@ namespace user_client
         private void HandlePostListControl()
         {
             PostListControl postListControl = new PostListControl();
-
-            // 이벤트 연결
             postListControl.CreateEvent += HandleCreateEvent;
             postListControl.SelectPostEvent += HandleSelectPost;
-            
 
-            // RootGrid에 추가
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(postListControl);
         }
@@ -102,7 +97,6 @@ namespace user_client
         private void HandleCreateEvent()
         {
             CreatePostControl createPostControl = new CreatePostControl();
-
             createPostControl.PostCreated += newPost =>
             {
                 RootGrid.Children.Clear();
@@ -117,6 +111,7 @@ namespace user_client
             RootGrid.Children.Clear();
             RootGrid.Children.Add(new PostDetailControl(post));
         }
+
         private void InitTray()
         {
             // 트레이 초기 설정
@@ -144,3 +139,5 @@ namespace user_client
         }
     }
 }
+
+

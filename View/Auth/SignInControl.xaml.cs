@@ -1,37 +1,37 @@
 ﻿using DotNetEnv;
 using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using user_client.Model;
 
 namespace user_client.View
 {
     /// <summary>
-    /// Interaction logic for SignInControl.xaml
+    /// 로그인 화면. ID/PW 입력 및 로그인 시도 처리
     /// </summary>
     public partial class SignInControl : System.Windows.Controls.UserControl
     {
         public event Action? GotoSignUpEvt;
         public event Action<UserData>? SuccessSignInEvt;
 
+        private int _failCount = 0;
+
         public SignInControl()
         {
             InitializeComponent();
         }
 
+        public SignInControl(Action<UserData> onSuccess, Action onGotoSignUp) : this()
+        {
+            SuccessSignInEvt += onSuccess;
+            GotoSignUpEvt += onGotoSignUp;
+        }
+
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-            string loginId = LoginIdBox.Text;
+            string loginId = LoginIdBox.Text.Trim();
             string password = PasswordBox.Password;
 
             if (string.IsNullOrWhiteSpace(loginId) || string.IsNullOrWhiteSpace(password))
@@ -41,26 +41,36 @@ namespace user_client.View
                 return;
             }
 
-
-            bool loginSuccess = true;
-
-            if (loginSuccess)
+            UserData? uData = GetUserData(loginId, password);
+            if (uData == null)
             {
-                LoginErrorText.Visibility = Visibility.Collapsed;
-
-
-                System.Windows.MessageBox.Show("로그인 성공!");
-                UserData uData = GetUserData(loginId);
-                if (uData == null) throw new Exception("로그인 정보를 찾을 수 없습니다");
-                SuccessSignInEvt?.Invoke(uData!);
-            }
-            else
-            {
-                LoginErrorText.Text = "사번 또는 비밀번호가 잘못되었습니다.";
+                _failCount++;
+                LoginErrorText.Text = $"사번 또는 비밀번호가 잘못되었습니다. ({_failCount})";
                 LoginErrorText.Visibility = Visibility.Visible;
-            }
-        }
 
+                if (_failCount >= 3)
+                {
+                    var parent = this.Parent as System.Windows.Controls.Panel;
+                    if (parent != null)
+                    {
+                        parent.Children.Clear();
+                        var otpControl = new TotpControl();
+                        otpControl.OtpSuccessEvt += () =>
+                        {
+                            parent.Children.Clear();
+                            var signInControl = new SignInControl(SuccessSignInEvt, GotoSignUpEvt);
+                            parent.Children.Add(signInControl);
+                        };
+                        parent.Children.Add(otpControl);
+                    }
+                }
+
+                return;
+            }
+
+            LoginErrorText.Visibility = Visibility.Collapsed;
+            SuccessSignInEvt?.Invoke(uData);
+        }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
         {
@@ -69,11 +79,11 @@ namespace user_client.View
                 : Visibility.Collapsed;
         }
 
-
         private void GoToSignUp_Click(object sender, MouseButtonEventArgs e)
         {
             GotoSignUpEvt?.Invoke();
         }
+
         private void LoginIdBox_GotFocus(object sender, RoutedEventArgs e)
         {
             LoginIdPlaceholder.Visibility = Visibility.Collapsed;
@@ -86,6 +96,7 @@ namespace user_client.View
                 LoginIdPlaceholder.Visibility = Visibility.Visible;
             }
         }
+
         private void PasswordBox_GotFocus(object sender, RoutedEventArgs e)
         {
             PasswordPlaceholder.Visibility = Visibility.Collapsed;
@@ -99,65 +110,55 @@ namespace user_client.View
             }
         }
 
-        private UserData? GetUserData(string empId)
+        private UserData? GetUserData(string empId, string password)
         {
-            string query = $"select e.id, e.name, r.position, e.phone, e.address, e.age " +
-                $"from employees e " +
-                $"inner join role r on r.id=e.role_id " +
-                $"where e.id='{empId}';";
+            string query = "select e.id, e.name, r.position, e.phone, e.address, e.age " +
+                           "from employees e " +
+                           "inner join role r on r.id = e.role_id " +
+                           "where e.id = @id and e.password = @password;";
 
-            string? host, port, uid, pwd, name;
-            string dbConnection;
-            UserData uData = new UserData();
             try
             {
                 Env.Load();
 
+                string? host = Environment.GetEnvironmentVariable("DB_HOST");
+                string? port = Environment.GetEnvironmentVariable("DB_PORT");
+                string? uid = Environment.GetEnvironmentVariable("DB_UID");
+                string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
+                string? name = Environment.GetEnvironmentVariable("DB_NAME");
 
-                host = Environment.GetEnvironmentVariable("DB_HOST");
-                if (host == null) throw new Exception(".env DB_HOST is null");
-                port = Environment.GetEnvironmentVariable("DB_PORT");
-                if (port == null) throw new Exception(".env DB_PORT is null");
-                uid = Environment.GetEnvironmentVariable("DB_UID");
-                if (uid == null) throw new Exception(".env DB_UID is null"); ;
-                pwd = Environment.GetEnvironmentVariable("DB_PWD");
-                if (pwd == null) throw new Exception(".env DB_PWD is null");
-                name = Environment.GetEnvironmentVariable("DB_NAME");
-                if (name == null) throw new Exception(".env DB_NAME is null");
+                if (host == null || port == null || uid == null || pwd == null || name == null)
+                    throw new Exception("환경변수 누락");
 
-                dbConnection = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
+                string dbConnection = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
 
-                using (MySqlConnection connection = new MySqlConnection(dbConnection))
+                using MySqlConnection connection = new MySqlConnection(dbConnection);
+                connection.Open();
+
+                using MySqlCommand cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@id", empId);
+                cmd.Parameters.AddWithValue("@password", password);
+
+                using MySqlDataReader rdr = cmd.ExecuteReader();
+                if (rdr.Read())
                 {
-                    connection.Open();
-
-                    MySqlCommand cmd = new MySqlCommand(query, connection);
-                    MySqlDataReader rdr = cmd.ExecuteReader();
-                    if (rdr == null) return null;
-
-                    while (rdr.Read())
+                    return new UserData
                     {
-                        uData = new UserData()
-                        {
-                            Id = rdr[0].ToString(),
-                            Name = rdr[1].ToString(),
-                            Position = rdr[2].ToString() == "ADMIN" ? "관리자" : "사원",
-                            Phone = rdr[3].ToString(),
-                            Address = rdr[4].ToString(),
-                            Age = Int32.Parse(rdr[5].ToString()),
-                        };
-                    }
-
-                    connection.Close();
-                    return uData;
+                        Id = rdr[0].ToString(),
+                        Name = rdr[1].ToString(),
+                        Position = rdr[2].ToString() == "ADMIN" ? "관리자" : "사원",
+                        Phone = rdr[3].ToString(),
+                        Address = rdr[4].ToString(),
+                        Age = int.Parse(rdr[5].ToString())
+                    };
                 }
-
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e.ToString());
-                return null;
+                Console.WriteLine(ex.Message);
             }
+
+            return null;
         }
     }
 }
