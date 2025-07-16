@@ -12,6 +12,7 @@ using user_client.Components;
 using user_client.Model;
 using user_client.View;
 using user_client.View.Chat;
+using user_client.ViewModel;
 using RabbitMQ.Client;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
@@ -24,10 +25,10 @@ namespace user_client
         private IConnection _conn;
         private IChannel _channel;
         private string _empId;
+        
         public MainWindow()
         {
             InitializeComponent();
-
             InitTray();
 
             HandleGotoSignInControl();
@@ -44,8 +45,6 @@ namespace user_client
             _agentProc.Close();
             Console.WriteLine("Killed Agent");
         }
-
-
         private async Task StartAgentAsync(string empId)
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -166,11 +165,11 @@ namespace user_client
             StartAgentAsync(uData.Id);
 
             PostListControl postListControl = new PostListControl();
-            postListControl.CreateEvent += HandleCreateEvent;
-            postListControl.SelectPostEvent += HandleSelectPost;
+            postListControl.CreateEvent += HandleNavigateCreatePost;
+            postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
             SideBarControl snb = new SideBarControl(uData);
-            snb.BoardNavigateEvt += HandlePostListControl;
+            snb.BoardNavigateEvt += HandleNavigatePostListControl;
             snb.PolicyRequestNavigateEvt += () => { };
             snb.ShowChatWindowEvt += HandleShowChatUserList;
 
@@ -186,38 +185,41 @@ namespace user_client
             window.Show();
         }
 
-        private void HandlePostListControl()
+        private void HandleNavigatePostListControl()
         {
-            PostListControl postListControl = new PostListControl();
+            var postListControl = new PostListControl();
 
             // 이벤트 연결
-            postListControl.CreateEvent += HandleCreateEvent;
-            postListControl.SelectPostEvent += HandleSelectPost;
-            
+            postListControl.CreateEvent += HandleNavigateCreatePost;
+            postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
             // RootGrid에 추가
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(postListControl);
         }
 
-        private void HandleCreateEvent()
+        private void HandleNavigateCreatePost(PostViewModel pvm)
         {
-            CreatePostControl createPostControl = new CreatePostControl();
+            CreatePostControl createPostControl = new CreatePostControl(pvm);
 
-            createPostControl.PostCreated += newPost =>
-            {
-                RootGrid.Children.Clear();
-                RootGrid.Children.Add(new PostDetailControl(newPost));
-            };
+            createPostControl.PostCreated += HandleNavigatePostDetail;
 
-            RootGrid.Children.Clear();
+            RootGrid.Children.RemoveAt(1);
+            RootGrid.Children.Add(createPostControl);
         }
 
-        private void HandleSelectPost(Post post)
+        private void HandleNavigatePostDetail(Post post, PostViewModel pvm)
         {
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new PostDetailControl(post));
+            PostDetailControl control = new PostDetailControl(post, pvm);
+
+            control.NavigatePostList += HandleNavigatePostListControl;
+            control.NavigatePostDetail += HandleNavigatePostDetail;
+            control.NavigateCreatePost += HandleNavigateCreatePost;
+
+            RootGrid.Children.RemoveAt(1);
+            RootGrid.Children.Add(control);
         }
+
         private void InitTray()
         {
             // 트레이 초기 설정
