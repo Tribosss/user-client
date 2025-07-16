@@ -1,90 +1,76 @@
 ﻿<UserControl x:Class="user_client.View.PostDetailControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:user_client.View"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <!-- Grid 정의 -->
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="1060">
+
+    <Grid Margin="160 0 0 0" Background="LightGray">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <!-- 상단 -->
-            <RowDefinition Height="*" />
-            <!-- 본문 -->
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <!-- 왼쪽 -->
-            <ColumnDefinition Width="Auto"/>
-            <!-- 오른쪽 -->
-        </Grid.ColumnDefinitions>
 
-        <!-- Title -->
-        <TextBlock x:Name="Title"
-                   Text="{Binding Title}"
-                   HorizontalAlignment="Left" 
-                   VerticalAlignment="Top" 
-                   FontSize="20" 
-                   Margin="58,4,0,0"
-                   Grid.Row="1" Grid.Column="0"/>
+        <!-- 제목 + 작성자 + 버튼 -->
+        <Grid Grid.Row="0" Margin="30,30,30,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-        <!-- 첫 번째 Button: 오른쪽 상단 -->
-        <Button Content="👤" 
-                Width="30" Height="30" 
-                FontSize="18" 
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top" 
-                Margin="0,30,30,0"
-                Grid.Row="0" Grid.Column="1"/>
+            <!-- 제목 -->
+            <TextBlock x:Name="Title"
+                       Text="{Binding Title}"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Foreground="Black"
+                       VerticalAlignment="Top"
+                       Margin="10"
+                       Background="White"
+                       Padding="10"/>
 
-        <!-- 수정과 삭제 버튼: 오른쪽 상단 버튼 아래 -->
-        <StackPanel Orientation="Horizontal" 
-                    HorizontalAlignment="Right" 
-                    VerticalAlignment="Top" 
-                    Margin="0,12,6,0" 
-                    Grid.Row="1">
-            <Button Content="수정" 
-                    Width="40" Height="30" 
-                    FontSize="12" />
-            <Button Content="삭제" 
-                    Margin="5,0,0,0"
-                    Width="40" Height="30" 
-                    FontSize="12" />
-        </StackPanel>
+            <!-- 작성자 + 버튼 + 날짜 -->
+            <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <!-- 수정/삭제 버튼 -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="수정" Width="50" Height="30" Margin="0,0,5,0" Click="EditButton_Click"/>
+                    <Button Content="삭제" Width="50" Height="30" Click="DeleteButton_Click"/>
+                </StackPanel>
 
-        <!-- Date: 오른쪽 버튼의 왼쪽 대각선 아래 -->
-        <TextBlock x:Name="Date"    
-                   Text="{Binding Date}"
-                   FontSize="10"
-                   HorizontalAlignment="Right" 
-                   VerticalAlignment="Top"  
-                   Margin="0,42,8,0"
-                   Grid.Row="1"/>
+                <!-- 날짜 -->
+                <TextBlock x:Name="Date"
+                           Text="{Binding Date}"
+                           FontSize="12"
+                           Foreground="Gray"
+                           HorizontalAlignment="Right"
+                           Margin="0,5,0,0"/>
+            </StackPanel>
 
-        <!-- Author와 두 번째 Button -->
-        <StackPanel Orientation="Horizontal" 
-                    HorizontalAlignment="Left" 
-                    VerticalAlignment="Top" 
-                    Margin="62,45,0,0"
-                    Grid.Row="1" Grid.Column="0">
-            <Button Content="👤" 
-                    Width="30" Height="30" 
-                    FontSize="18" />
-            <TextBlock x:Name="Author"
-                       Text="{Binding Author}"
-                       FontSize="15"
-                       Margin="5,0,0,0"
-                       VerticalAlignment="Center" />
-        </StackPanel>
+            <!-- 작성자 프로필 (제목 아래 왼쪽) -->
+            <StackPanel Orientation="Horizontal" Margin="10,60,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2">
+                <Ellipse Width="40" Height="40" Stroke="Gray" StrokeThickness="1" Margin="0,0,10,0">
+                    <Ellipse.Fill>
+                        <ImageBrush ImageSource="{Binding AuthorProfileImage}" />
+                    </Ellipse.Fill>
+                </Ellipse>
+                <StackPanel>
+                    <TextBlock Text="{Binding Author}" FontWeight="Bold" FontSize="14" Foreground="Black"/>
+                    <TextBlock Text="{Binding AuthorPosition}" FontSize="12" Foreground="Gray"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
 
-        <!-- Body -->
-        <TextBlock x:Name="Body"    
-                   Text="{Binding Body}"
-                   FontSize="15" 
-                   VerticalAlignment="Top"  
-                   Margin="62,112,0,0"
-                   Grid.Row="1" Height="268"/>
+        <!-- 본문 -->
+        <ScrollViewer Grid.Row="1" Margin="30,20,30,30" VerticalScrollBarVisibility="Auto">
+            <Border Background="White" Padding="20">
+                <TextBlock x:Name="Body"
+                           Text="{Binding Body}"
+                           FontSize="15"
+                           TextWrapping="Wrap"
+                           Foreground="Black"/>
+            </Border>
+        </ScrollViewer>
     </Grid>
 </UserControl>

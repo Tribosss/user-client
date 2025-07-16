@@ -12,16 +12,19 @@ using user_client.Components;
 using user_client.Model;
 using user_client.View;
 using user_client.View.Chat;
+using user_client.ViewModel;
 
 namespace user_client
 {
     public partial class MainWindow : Window
     {
         private Process _agentProc;
+        public PostViewModel SharedViewModel { get; private set; }
+
         public MainWindow()
         {
             InitializeComponent();
-
+            SharedViewModel = new PostViewModel();
             InitTray();
 
             HandleGotoSignInControl();
@@ -31,7 +34,17 @@ namespace user_client
             if (_agentProc == null || _agentProc.HasExited) return;
             _agentProc.Kill();
         }
+        private void NavigateToPostList()
+        {
+            HandlePostListControl(); // 게시판 목록 화면으로 전환
+        }
+        private void NavigateToPostDetail(Post post)
+        {
+            var postDetailControl = new PostDetailControl(post, NavigateToPostList);
 
+            RootGrid.Children.RemoveAt(1);
+            RootGrid.Children.Add(postDetailControl);
+        }
         private void StartAgent(string empId)
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -87,7 +100,10 @@ namespace user_client
 
         private void HandlePostListControl()
         {
-            PostListControl postListControl = new PostListControl();
+            var postListControl = new PostListControl
+            {
+                DataContext = SharedViewModel  // 💡 공통 ViewModel 주입!
+            };
 
             // 이벤트 연결
             postListControl.CreateEvent += HandleCreateEvent;
@@ -103,19 +119,20 @@ namespace user_client
         {
             CreatePostControl createPostControl = new CreatePostControl();
 
-            createPostControl.PostCreated += newPost =>
+            createPostControl.PostCreated += updatedPost =>
             {
-                RootGrid.Children.Clear();
-                RootGrid.Children.Add(new PostDetailControl(newPost));
+                RootGrid.Children.RemoveAt(1);
+                RootGrid.Children.Add(new PostDetailControl(updatedPost, NavigateToPostList));
             };
 
-            RootGrid.Children.Clear();
+            RootGrid.Children.RemoveAt(1);
+            RootGrid.Children.Add(createPostControl);
         }
 
         private void HandleSelectPost(Post post)
         {
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new PostDetailControl(post));
+            RootGrid.Children.RemoveAt(1);
+            RootGrid.Children.Add(new PostDetailControl(post, NavigateToPostList)); 
         }
         private void InitTray()
         {
