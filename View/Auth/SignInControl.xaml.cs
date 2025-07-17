@@ -142,9 +142,9 @@ namespace user_client.View
                             Id = rdr[0].ToString(),
                             Name = rdr[1].ToString(),
                             Position = rdr[2].ToString() == "ADMIN" ? "관리자" : "사원",
-                            Phone = rdr[3].ToString(),
-                            Address = rdr[4].ToString(),
-                            Age = Int32.Parse(rdr[5].ToString()),
+                            Phone = string.IsNullOrEmpty(rdr[3].ToString()) ? "Null" : rdr[3].ToString(),
+                            Address = string.IsNullOrEmpty(rdr[4].ToString()) ? "Null" : rdr[3].ToString(),
+                            Age = Int32.Parse(string.IsNullOrEmpty(rdr[5].ToString()) ? "0" : rdr[3].ToString()),
                         };
                     }
 

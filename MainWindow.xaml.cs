@@ -21,10 +21,8 @@ namespace user_client
 {
     public partial class MainWindow : Window
     {
-        private Process _agentProc;
-        private IConnection _conn;
-        private IChannel _channel;
-        private string _empId;
+        private AgentClient agcli;
+        private RabbitClient rbcli;
         
         public MainWindow()
         {
@@ -35,112 +33,7 @@ namespace user_client
         }
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            KillAgent();
-        }
-
-        private void KillAgent()
-        {
-            if (_agentProc == null) return;
-            _agentProc.Kill();
-            _agentProc.Close();
-            Console.WriteLine("Killed Agent");
-        }
-        private async Task StartAgentAsync(string empId)
-        {
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = Path.Combine(baseDir, "Agent", "PacketFlowMonitor.exe"),
-                Arguments = empId,
-                UseShellExecute = false,
-            };
-            _agentProc = Process.Start(startInfo);
-            Console.WriteLine("Started Agent");
-
-            if (_conn != null && _channel != null && _conn.IsOpen && _channel.IsOpen) return;
-            ConnectRabbitServer();
-        }
-
-        private void ParseAdminMessage(string msg)
-        {
-            string[] msgs = msg.Split("<");
-            string policyType = msgs[0];
-            string toggle = msgs[1].Split(">")[0];
-
-            switch (policyType) {
-                case "AGENT":
-                    {
-                        if (toggle == "OFF")
-                        {
-                            KillAgent();
-                        } else if (toggle == "ON")
-                        {
-                            StartAgentAsync(_empId);
-                        }
-                        break;
-                    }     
-            }
-
-        }
-
-        private async Task ConnectRabbitServer()
-        {
-            if (_empId == null || string.IsNullOrEmpty(_empId)) return; 
-
-            string queueName = $"client_{_empId}";
-            string exchangeName = "tribosss";
-            string routingKey = "policy.set";
-            ConnectionFactory factory = new ConnectionFactory()
-            {
-                HostName = "localhost",
-                UserName = "guest",
-                Password = "guest",
-                ClientProvidedName = $"[{_empId}]"
-            };
-            _conn = await factory.CreateConnectionAsync();
-            _channel = await _conn.CreateChannelAsync();
-            await _channel.QueueDeclareAsync(
-                queueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false
-            );
-            await _channel.QueueBindAsync(
-                queueName,
-                exchangeName,
-                routingKey,
-                null
-            );
-            await _channel.ExchangeDeclareAsync(
-                exchangeName,
-                ExchangeType.Direct,
-                durable: true,
-                autoDelete: false,
-                arguments: null
-            );
-
-            AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(_channel);
-            consumer.ReceivedAsync += ReceivedMessageAtAdmin;
-
-            string consumerTag = await _channel.BasicConsumeAsync(
-                queue: queueName,
-                autoAck: false,
-                consumer: consumer
-            );
-        }
-
-        private async Task ReceivedMessageAtAdmin(object model, BasicDeliverEventArgs ea)
-        {
-            byte[] body = ea.Body.ToArray();
-            string msg = Encoding.UTF8.GetString(body);
-            Console.WriteLine($"Received: [{msg}]");
-
-            ParseAdminMessage(msg);
-
-            await _channel.BasicAckAsync(
-                deliveryTag: ea.DeliveryTag,
-                multiple: false
-            );
+            agcli.KillAgent();
         }
 
         private void HandleGotoSignInControl()
@@ -161,8 +54,8 @@ namespace user_client
 
         private void SuccessSignIn(UserData uData)
         {
-            _empId = uData.Id;
-            StartAgentAsync(uData.Id);
+            rbcli = new RabbitClient(uData.Id);
+            rbcli.StartAgent(uData.Id);
 
             PostListControl postListControl = new PostListControl();
             postListControl.CreateEvent += HandleNavigateCreatePost;
