@@ -15,11 +15,12 @@ namespace user_client.View
         private Post? _editingPost = null;
         private string? _originalTitle;
         private PostViewModel _vm;
-
-        public CreatePostControl(PostViewModel vm)
+        private string? _currentUserId;
+        public CreatePostControl(PostViewModel vm, string currentUserId)
         {
             InitializeComponent();
             _vm = vm;
+            _currentUserId = currentUserId;
         }
         public CreatePostControl(Post postToEdit, bool isEditMode)
         {
@@ -73,7 +74,7 @@ namespace user_client.View
                     Title = TitleTextBox.Text,
                     Body = BodyTextBox.Text,
                     Date = DateTime.Now,
-                    Author = "익명",
+                    Author = _currentUserId,
                     Type = selectedType
                 };
                 InsertPostToDatabase(newPost);
@@ -107,7 +108,7 @@ namespace user_client.View
                     insertCmd.Parameters.AddWithValue("@title", post.Title);
                     insertCmd.Parameters.AddWithValue("@body", post.Body);
                     insertCmd.Parameters.AddWithValue("@date", post.Date);
-                    insertCmd.Parameters.AddWithValue("@author", post.Author ?? "익명");
+                    insertCmd.Parameters.AddWithValue("@author", post.Author);
                     insertCmd.Parameters.AddWithValue("@Type", post.Type ?? "NORMAL");
 
                     if (insertCmd.ExecuteNonQuery() == 1)

@@ -29,6 +29,8 @@ namespace user_client.View
         public Action<PostViewModel?> NavigateCreatePost;
         public PostViewModel _vm;
         private Post _post;
+        private string _currentUserId;
+
         public Post Post
         {
             get => _post;
@@ -39,21 +41,43 @@ namespace user_client.View
             }
         }
 
-        public PostDetailControl(Post post, PostViewModel vm)
+        public PostDetailControl(Post post, PostViewModel vm, string currentUserId)
         {
             InitializeComponent();
             _vm = vm;
             _post = post;
+            _currentUserId = currentUserId;
             this.DataContext = this;
+
+            SetButtonVisibility();
         }
+        private void SetButtonVisibility()
+        {
+            if (_post.Author != _currentUserId)
+            {
+                EditButton.Visibility = Visibility.Collapsed;
+                DeleteButton.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                EditButton.Visibility = Visibility.Visible;
+                DeleteButton.Visibility = Visibility.Visible;
+            }
+        }
+
         private void EditButton_Click(object sender, RoutedEventArgs e)
         {
             var createPostControl = new CreatePostControl(_post,true);
 
             // 수정 완료 후 PostDetailControl로 다시 이동
             createPostControl.PostCreated += NavigatePostDetail.Invoke;
-
-            NavigateCreatePost?.Invoke(_vm);
+            var mainWindow = Window.GetWindow(this) as MainWindow;
+            if (mainWindow != null)
+            {
+                // 🔽 화면 전환 (직접 제어)
+                mainWindow.RootGrid.Children.RemoveAt(1);
+                mainWindow.RootGrid.Children.Add(createPostControl);
+            }
         }
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
@@ -62,8 +86,7 @@ namespace user_client.View
 
             try
             {
-                var post = DataContext as Post;
-                if (post == null)
+                if (_post == null)
                 {
                     System.Windows.MessageBox.Show("게시글 정보 없음");
                     return;
@@ -80,7 +103,7 @@ namespace user_client.View
                     connection.Open();
                     string query = "DELETE FROM posts WHERE Id = @id";
                     MySqlCommand cmd = new MySqlCommand(query, connection);
-                    cmd.Parameters.AddWithValue("@id", post.Id);
+                    cmd.Parameters.AddWithValue("@id", _post.Id);
                     cmd.ExecuteNonQuery();
                 }
 
