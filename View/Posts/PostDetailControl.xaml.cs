@@ -31,7 +31,6 @@ namespace user_client.View
         private Post _post;
         private string _currentUserId;
         public event Action<Post> EditRequested;
-        public event Action<int> DeleteRequested;
 
         public Post Post
         {
