@@ -15,6 +15,7 @@ namespace user_client.View
     {
         public event Action? GotoSignUpEvt;
         public event Action<UserData>? SuccessSignInEvt;
+        public event Action? RequireOtpEvt; 
 
         private int _failCount = 0;
 
@@ -31,7 +32,7 @@ namespace user_client.View
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-            string loginId = LoginIdBox.Text.Trim();
+            string loginId = LoginIdBox.Text;
             string password = PasswordBox.Password;
 
             if (string.IsNullOrWhiteSpace(loginId) || string.IsNullOrWhiteSpace(password))
@@ -50,20 +51,11 @@ namespace user_client.View
 
                 if (_failCount >= 3)
                 {
-                    var parent = this.Parent as System.Windows.Controls.Panel;
-                    if (parent != null)
-                    {
-                        parent.Children.Clear();
-                        var otpControl = new TotpControl();
-                        otpControl.OtpSuccessEvt += () =>
-                        {
-                            parent.Children.Clear();
-                            var signInControl = new SignInControl(SuccessSignInEvt, GotoSignUpEvt);
-                            parent.Children.Add(signInControl);
-                        };
-                        parent.Children.Add(otpControl);
-                    }
+                    RequireOtpEvt?.Invoke();
+
+                    return;
                 }
+
 
                 return;
             }

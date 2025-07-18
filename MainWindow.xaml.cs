@@ -47,10 +47,18 @@ namespace user_client
         private void HandleGotoSignInControl()
         {
             RootGrid.Children.Clear();
-            var control = new SignInControl(SuccessSignIn, HandleGotoSignUpControl);
-            RootGrid.Children.Add(control);
+            var signInControl = new SignInControl(SuccessSignIn, HandleGotoSignUpControl);
+            signInControl.RequireOtpEvt += HandleGotoOtpControl; // 로그인 3회 실패 시 이벤트 연결하는놈
+            RootGrid.Children.Add(signInControl);
         }
-
+        //otp화면으로 가는 메서드 추가
+        private void HandleGotoOtpControl()
+        {
+            RootGrid.Children.Clear();
+            var otpControl = new TotpControl();
+            otpControl.OtpSuccessEvt += HandleGotoSignInControl; // 인증 성공 시 다시 로그인 화면으로 가는놈
+            RootGrid.Children.Add(otpControl);
+        }
         private void HandleGotoSignUpControl()
         {
             RootGrid.Children.Clear();
