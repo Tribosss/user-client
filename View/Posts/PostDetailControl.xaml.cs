@@ -31,7 +31,7 @@ namespace user_client.View
         private Post _post;
         private string _currentUserId;
         public event Action<Post> EditRequested;
-        public event Action<Post> DeleteRequested;
+        public event Action<int> DeleteRequested;
 
         public Post Post
         {
@@ -76,7 +76,36 @@ namespace user_client.View
             var result = System.Windows.MessageBox.Show("정말 삭제하시겠습니까?", "확인", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                DeleteRequested?.Invoke(_post); // 이벤트 발생
+                DeletePost(_post.Id);
+                System.Windows.MessageBox.Show("삭제 완료");
+                NavigatePostList?.Invoke();
+            }
+        }
+        private void DeletePost(int postId)
+        {
+            try
+            {
+                Env.Load();
+                string connStr = $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" +
+                                 $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
+                                 $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                                 $"Uid={Environment.GetEnvironmentVariable("DB_UID")};" +
+                                 $"Pwd={Environment.GetEnvironmentVariable("DB_PWD")}";
+
+                using (var conn = new MySqlConnection(connStr))
+                {
+                    conn.Open();
+                    string query = "DELETE FROM posts WHERE Id = @id";
+                    using (var cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", postId);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("삭제 오류: " + ex.Message);
             }
         }
     }

@@ -11,8 +11,8 @@ namespace user_client.View
     public partial class CreatePostControl : System.Windows.Controls.UserControl
     {
         public event Action<Post, PostViewModel>? PostCreated;
-        private bool _isEditMode = false;
-        private Post? _editingPost = null;
+        private bool _isEditMode;
+        private Post? _editingPost;
         private string? _originalTitle;
         private PostViewModel _vm;
         private string? _currentUserId;
