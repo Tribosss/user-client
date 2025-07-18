@@ -215,11 +215,51 @@ namespace user_client
             control.NavigatePostList += HandleNavigatePostListControl;
             control.NavigatePostDetail += HandleNavigatePostDetail;
             control.NavigateCreatePost += HandleNavigateCreatePost;
+            control.EditRequested += HandleEditPost;
+            control.DeleteRequested += HandleDeletePost;
 
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(control);
         }
+        private void HandleEditPost(Post post)
+        {
+            var createPostControl = new CreatePostControl(post, true);
 
+            createPostControl.PostCreated += HandleNavigatePostDetail;
+
+            RootGrid.Children.RemoveAt(1);
+            RootGrid.Children.Add(createPostControl);
+        }
+        private void HandleDeletePost(Post post)
+        {
+            try
+            {
+                Env.Load();
+                string connStr = $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" +
+                                 $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
+                                 $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                                 $"Uid={Environment.GetEnvironmentVariable("DB_UID")};" +
+                                 $"Pwd={Environment.GetEnvironmentVariable("DB_PWD")}";
+
+                using (var conn = new MySqlConnection(connStr))
+                {
+                    conn.Open();
+                    string query = "DELETE FROM posts WHERE Id = @id";
+                    using (var cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", post.Id);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                System.Windows.MessageBox.Show("삭제 완료");
+                HandleNavigatePostListControl();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("오류: " + ex.Message);
+            }
+        }
         private void InitTray()
         {
             // 트레이 초기 설정
