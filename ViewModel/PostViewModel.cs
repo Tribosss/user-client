@@ -16,9 +16,18 @@ namespace user_client.ViewModel
     {
         public ObservableCollection<Post> AllPosts { get; set; } = new ObservableCollection<Post>();
         public ObservableCollection<Post> Posts { get; set; } = new ObservableCollection<Post>();
-
+        private int _totalPostCount;
         private int _currentPage = 1;
         private const int PageSize = 15;
+        public int TotalPostCount
+        {
+            get => _totalPostCount;
+            set
+            {
+                _totalPostCount = value;
+                OnPropertyChanged(nameof(TotalPostCount));
+            }
+        }
         public int CurrentPage
         {
             get => _currentPage;
@@ -74,6 +83,7 @@ namespace user_client.ViewModel
         {
             NextPageCommand = new RelayCommand(_ => NextPage(), _ => CurrentPage < TotalPages);
             PreviousPageCommand = new RelayCommand(_ => PreviousPage(), _ => CurrentPage > 1);
+            LoadPosts();
         }
         private void NextPage()
         {
@@ -109,6 +119,11 @@ namespace user_client.ViewModel
                 using (var connection = new MySqlConnection(connStr))
                 {
                     connection.Open();
+                    string countQuery = "SELECT COUNT(*) FROM posts";
+                    using (var countCmd = new MySqlCommand(countQuery, connection))
+                    {
+                        TotalPostCount = Convert.ToInt32(countCmd.ExecuteScalar());
+                    }
                     string query = "SELECT * FROM posts ORDER BY Id DESC";
                     using (var cmd = new MySqlCommand(query, connection))
                     using (var reader = cmd.ExecuteReader())

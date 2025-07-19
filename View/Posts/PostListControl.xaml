@@ -16,8 +16,10 @@
                NavigationUIVisibility="Hidden" />
         <TextBlock Text="전체 글 보기" FontSize="20" FontWeight="Bold"
                    Margin="50,40,0,0" />
-        <TextBlock Text="23,349개의 글" FontSize="12"
-                   Margin="50,80,0,0" />
+        <TextBlock FontSize="12" Margin="50,80,0,0">
+            <Run Text="{Binding TotalPostCount}" />
+            <Run Text="개의 글" />
+        </TextBlock>
 
         <Button Content="생성" HorizontalAlignment="Right" VerticalAlignment="Top" 
                 Width="50" Height="30" Margin="0,20,50,0" FontSize="12" Click="CreateButton_Click" />
