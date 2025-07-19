@@ -29,6 +29,9 @@ namespace user_client.View
         public Action<PostViewModel?> NavigateCreatePost;
         public PostViewModel _vm;
         private Post _post;
+        private string _currentUserId;
+        public event Action<Post> EditRequested;
+
         public Post Post
         {
             get => _post;
@@ -39,58 +42,69 @@ namespace user_client.View
             }
         }
 
-        public PostDetailControl(Post post, PostViewModel vm)
+        public PostDetailControl(Post post, PostViewModel vm, string currentUserId)
         {
             InitializeComponent();
             _vm = vm;
             _post = post;
+            _currentUserId = currentUserId;
             this.DataContext = this;
+
+            SetButtonVisibility();
         }
+        private void SetButtonVisibility()
+        {
+            if (_post.Author != _currentUserId)
+            {
+                EditButton.Visibility = Visibility.Collapsed;
+                DeleteButton.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                EditButton.Visibility = Visibility.Visible;
+                DeleteButton.Visibility = Visibility.Visible;
+            }
+        }
+
         private void EditButton_Click(object sender, RoutedEventArgs e)
         {
-            var createPostControl = new CreatePostControl(_post,true);
-
-            // 수정 완료 후 PostDetailControl로 다시 이동
-            createPostControl.PostCreated += NavigatePostDetail.Invoke;
-
-            NavigateCreatePost?.Invoke(_vm);
+            EditRequested?.Invoke(_post);
         }
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
             var result = System.Windows.MessageBox.Show("정말 삭제하시겠습니까?", "확인", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result != MessageBoxResult.Yes) return;
-
+            if (result == MessageBoxResult.Yes)
+            {
+                DeletePost(_post.Id);
+                System.Windows.MessageBox.Show("삭제 완료");
+                NavigatePostList?.Invoke();
+            }
+        }
+        private void DeletePost(int postId)
+        {
             try
             {
-                var post = DataContext as Post;
-                if (post == null)
-                {
-                    System.Windows.MessageBox.Show("게시글 정보 없음");
-                    return;
-                }
                 Env.Load();
-                string? host = Environment.GetEnvironmentVariable("DB_HOST");
-                string? port = Environment.GetEnvironmentVariable("DB_PORT");
-                string? name = Environment.GetEnvironmentVariable("DB_NAME");
-                string? uid = Environment.GetEnvironmentVariable("DB_UID");
-                string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
-                string connStr = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";// 환경변수 대체
-                using (var connection = new MySqlConnection(connStr))
+                string connStr = $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" +
+                                 $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
+                                 $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                                 $"Uid={Environment.GetEnvironmentVariable("DB_UID")};" +
+                                 $"Pwd={Environment.GetEnvironmentVariable("DB_PWD")}";
+
+                using (var conn = new MySqlConnection(connStr))
                 {
-                    connection.Open();
+                    conn.Open();
                     string query = "DELETE FROM posts WHERE Id = @id";
-                    MySqlCommand cmd = new MySqlCommand(query, connection);
-                    cmd.Parameters.AddWithValue("@id", post.Id);
-                    cmd.ExecuteNonQuery();
+                    using (var cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", postId);
+                        cmd.ExecuteNonQuery();
+                    }
                 }
-
-                System.Windows.MessageBox.Show("삭제 완료");
-
-                NavigatePostList?.Invoke();
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("오류: " + ex.Message);
+                System.Windows.MessageBox.Show("삭제 오류: " + ex.Message);
             }
         }
     }

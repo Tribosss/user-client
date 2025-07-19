@@ -206,7 +206,7 @@ namespace user_client
 
         private void HandleNavigateCreatePost(PostViewModel pvm)
         {
-            CreatePostControl createPostControl = new CreatePostControl(pvm);
+            CreatePostControl createPostControl = new CreatePostControl(pvm, _empId);
 
             createPostControl.PostCreated += HandleNavigatePostDetail;
 
@@ -216,14 +216,24 @@ namespace user_client
 
         private void HandleNavigatePostDetail(Post post, PostViewModel pvm)
         {
-            PostDetailControl control = new PostDetailControl(post, pvm);
+            PostDetailControl control = new PostDetailControl(post, pvm, _empId);
 
             control.NavigatePostList += HandleNavigatePostListControl;
             control.NavigatePostDetail += HandleNavigatePostDetail;
             control.NavigateCreatePost += HandleNavigateCreatePost;
+            control.EditRequested += HandleEditPost;
 
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(control);
+        }
+        private void HandleEditPost(Post post)
+        {
+            var createPostControl = new CreatePostControl(post, true);
+
+            createPostControl.PostCreated += HandleNavigatePostDetail;
+
+            RootGrid.Children.RemoveAt(1);
+            RootGrid.Children.Add(createPostControl);
         }
 
         private void InitTray()
