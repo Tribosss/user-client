@@ -30,9 +30,9 @@ namespace user_client
         {
             InitializeComponent();
             InitTray();
-
             HandleGotoSignInControl();
         }
+
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
             KillAgent();
@@ -146,10 +146,17 @@ namespace user_client
         private void HandleGotoSignInControl()
         {
             RootGrid.Children.Clear();
-            SignInControl control = new SignInControl();
-            control.GotoSignUpEvt += HandleGotoSignUpControl;
-            control.SuccessSignInEvt += SuccessSignIn;
-            RootGrid.Children.Add(control);
+            var signInControl = new SignInControl(SuccessSignIn, HandleGotoSignUpControl);
+            signInControl.RequireOtpEvt += HandleGotoOtpControl; // 로그인 3회 실패 시 이벤트 연결하는놈
+            RootGrid.Children.Add(signInControl);
+        }
+        //otp화면으로 가는 메서드 추가
+        private void HandleGotoOtpControl()
+        {
+            RootGrid.Children.Clear();
+            var otpControl = new TotpControl();
+            otpControl.OtpSuccessEvt += HandleGotoSignInControl; // 인증 성공 시 다시 로그인 화면으로 가는놈
+            RootGrid.Children.Add(otpControl);
         }
         private void HandleGotoSignUpControl()
         {
@@ -193,7 +200,6 @@ namespace user_client
             postListControl.CreateEvent += HandleNavigateCreatePost;
             postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
-            // RootGrid에 추가
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(postListControl);
         }
@@ -247,3 +253,5 @@ namespace user_client
         }
     }
 }
+
+
