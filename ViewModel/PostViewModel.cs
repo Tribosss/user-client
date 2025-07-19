@@ -101,6 +101,15 @@ namespace user_client.ViewModel
                 UpdatePostsForCurrentPage();
             }
         }
+        private int GetTotalPostCount(MySqlConnection connection)
+        {
+            string countQuery = "SELECT COUNT(*) FROM posts";
+            using (var countCmd = new MySqlCommand(countQuery, connection))
+            {
+                return Convert.ToInt32(countCmd.ExecuteScalar());
+            }
+        }
+
         public void LoadPosts()
         {
             AllPosts.Clear();
@@ -119,11 +128,7 @@ namespace user_client.ViewModel
                 using (var connection = new MySqlConnection(connStr))
                 {
                     connection.Open();
-                    string countQuery = "SELECT COUNT(*) FROM posts";
-                    using (var countCmd = new MySqlCommand(countQuery, connection))
-                    {
-                        TotalPostCount = Convert.ToInt32(countCmd.ExecuteScalar());
-                    }
+                    TotalPostCount = GetTotalPostCount(connection);
                     string query = "SELECT * FROM posts ORDER BY Id DESC";
                     using (var cmd = new MySqlCommand(query, connection))
                     using (var reader = cmd.ExecuteReader())
