@@ -109,7 +109,28 @@ namespace user_client.ViewModel
                 return Convert.ToInt32(countCmd.ExecuteScalar());
             }
         }
-
+        private List<Post> GetAllPosts(MySqlConnection connection)
+        {
+            var posts = new List<Post>();
+            string query = "SELECT * FROM posts ORDER BY Id DESC";
+            using (var cmd = new MySqlCommand(query, connection))
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var post = new Post
+                    {
+                        Id = reader.GetInt32("Id"),
+                        Title = reader.GetString("Title"),
+                        Body = reader.GetString("Body"),
+                        Type = reader.GetString("Type"),
+                        Date = reader.GetDateTime("created_at")
+                    };
+                    posts.Add(post);
+                }
+            }
+            return posts;
+        }
         public void LoadPosts()
         {
             AllPosts.Clear();
@@ -129,22 +150,10 @@ namespace user_client.ViewModel
                 {
                     connection.Open();
                     TotalPostCount = GetTotalPostCount(connection);
-                    string query = "SELECT * FROM posts ORDER BY Id DESC";
-                    using (var cmd = new MySqlCommand(query, connection))
-                    using (var reader = cmd.ExecuteReader())
+                    var posts = GetAllPosts(connection);
+                    foreach (var post in posts)
                     {
-                        while (reader.Read())
-                        {
-                            var post = new Post
-                            {
-                                Id = reader.GetInt32("Id"),
-                                Title = reader.GetString("Title"),
-                                Body = reader.GetString("Body"),
-                                Type = reader.GetString("Type"),
-                                Date = reader.GetDateTime("created_at")
-                            };
-                            AllPosts.Add(post);
-                        }
+                        AllPosts.Add(post);
                     }
                 }
 
