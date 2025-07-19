@@ -16,9 +16,18 @@ namespace user_client.ViewModel
     {
         public ObservableCollection<Post> AllPosts { get; set; } = new ObservableCollection<Post>();
         public ObservableCollection<Post> Posts { get; set; } = new ObservableCollection<Post>();
-
+        private int _totalPostCount;
         private int _currentPage = 1;
         private const int PageSize = 15;
+        public int TotalPostCount
+        {
+            get => _totalPostCount;
+            set
+            {
+                _totalPostCount = value;
+                OnPropertyChanged(nameof(TotalPostCount));
+            }
+        }
         public int CurrentPage
         {
             get => _currentPage;
@@ -74,6 +83,7 @@ namespace user_client.ViewModel
         {
             NextPageCommand = new RelayCommand(_ => NextPage(), _ => CurrentPage < TotalPages);
             PreviousPageCommand = new RelayCommand(_ => PreviousPage(), _ => CurrentPage > 1);
+            LoadPosts();
         }
         private void NextPage()
         {
@@ -90,6 +100,36 @@ namespace user_client.ViewModel
                 CurrentPage--;
                 UpdatePostsForCurrentPage();
             }
+        }
+        private int GetTotalPostCount(MySqlConnection connection)
+        {
+            string countQuery = "SELECT COUNT(*) FROM posts";
+            using (var countCmd = new MySqlCommand(countQuery, connection))
+            {
+                return Convert.ToInt32(countCmd.ExecuteScalar());
+            }
+        }
+        private List<Post> GetAllPosts(MySqlConnection connection)
+        {
+            var posts = new List<Post>();
+            string query = "SELECT * FROM posts ORDER BY Id DESC";
+            using (var cmd = new MySqlCommand(query, connection))
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var post = new Post
+                    {
+                        Id = reader.GetInt32("Id"),
+                        Title = reader.GetString("Title"),
+                        Body = reader.GetString("Body"),
+                        Type = reader.GetString("Type"),
+                        Date = reader.GetDateTime("created_at")
+                    };
+                    posts.Add(post);
+                }
+            }
+            return posts;
         }
         public void LoadPosts()
         {
@@ -109,22 +149,11 @@ namespace user_client.ViewModel
                 using (var connection = new MySqlConnection(connStr))
                 {
                     connection.Open();
-                    string query = "SELECT * FROM posts ORDER BY Id DESC";
-                    using (var cmd = new MySqlCommand(query, connection))
-                    using (var reader = cmd.ExecuteReader())
+                    TotalPostCount = GetTotalPostCount(connection);
+                    var posts = GetAllPosts(connection);
+                    foreach (var post in posts)
                     {
-                        while (reader.Read())
-                        {
-                            var post = new Post
-                            {
-                                Id = reader.GetInt32("Id"),
-                                Title = reader.GetString("Title"),
-                                Body = reader.GetString("Body"),
-                                Type = reader.GetString("Type"),
-                                Date = reader.GetDateTime("created_at")
-                            };
-                            AllPosts.Add(post);
-                        }
+                        AllPosts.Add(post);
                     }
                 }
 
