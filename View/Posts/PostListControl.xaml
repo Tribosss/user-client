@@ -11,30 +11,16 @@
         <vm:PostViewModel />
     </UserControl.DataContext>
 
-    <Grid Margin="160 0 0 0" Width="900" Height="600">
+    <Grid Margin="160 0 0 0">
         <Frame Name="PostListFrame" Width="900"
                NavigationUIVisibility="Hidden" />
-        <Button Content="👤" 
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Top" 
-                Width="30" 
-                Height="30" 
-                FontSize="18" 
-                Margin="0,20,50,0" 
-                Panel.ZIndex="2" />
         <TextBlock Text="전체 글 보기" FontSize="20" FontWeight="Bold"
                    Margin="50,40,0,0" />
         <TextBlock Text="23,349개의 글" FontSize="12"
                    Margin="50,80,0,0" />
 
-        <ComboBox HorizontalAlignment="Right" VerticalAlignment="Top" Width="70"
-                  Margin="0,70,50,0" SelectedIndex="0">
-            <ComboBoxItem Content="15개씩" />
-            <ComboBoxItem Content="30개씩" />
-        </ComboBox>
-
         <Button Content="생성" HorizontalAlignment="Right" VerticalAlignment="Top" 
-                Width="50" Height="30" Margin="0,20,90,0" FontSize="12" Click="CreateButton_Click" />
+                Width="50" Height="30" Margin="0,20,50,0" FontSize="12" Click="CreateButton_Click" />
 
         <DataGrid 
             x:Name="PostList"
@@ -43,6 +29,7 @@
             HorizontalAlignment="Stretch"
             SelectionMode="Single"
             AutoGenerateColumns="false"
+            CanUserAddRows="False"
             Margin="50,110,50,30"
             Background="White"
             RowHeaderWidth="0"
@@ -66,12 +53,19 @@
             </DataGrid.CellStyle>
 
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Status}" Header="분류" IsReadOnly="True" Width="1*" />
+                <DataGridTextColumn Binding="{Binding Type}" Header="분류" IsReadOnly="True" Width="1*" />
                 <DataGridTextColumn Binding="{Binding Title}" Header="제목" IsReadOnly="True" Width="5*" />
                 <DataGridTextColumn Binding="{Binding Author}" Header="작성자" IsReadOnly="True" Width="2*" />
                 <DataGridTextColumn Binding="{Binding Date}" Header="작성일" IsReadOnly="True" Width="2*" />
             </DataGrid.Columns>
         </DataGrid>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
+            <Button Content="◀" Command="{Binding PreviousPageCommand}" Width="30" Click="PrevPage_Click"/>
+            <TextBlock Text="{Binding CurrentPage}" Margin="10,0" VerticalAlignment="Center"/>
+            <TextBlock Text="/" Margin="2,0"/>
+            <TextBlock Text="{Binding TotalPages}" Margin="2,0" VerticalAlignment="Center"/>
+            <Button Content="▶" Command="{Binding NextPageCommand}" Width="30" Click="NextPage_Click"/>
+        </StackPanel>
     </Grid>
 
 </UserControl>

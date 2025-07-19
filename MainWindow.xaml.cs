@@ -12,13 +12,20 @@ using user_client.Components;
 using user_client.Model;
 using user_client.View;
 using user_client.View.Chat;
+using user_client.ViewModel;
+using RabbitMQ.Client;
+using System.Threading.Tasks;
+using RabbitMQ.Client.Events;
 
 namespace user_client
 {
     public partial class MainWindow : Window
     {
         private Process _agentProc;
-
+        private IConnection _conn;
+        private IChannel _channel;
+        private string _empId;
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -28,11 +35,17 @@ namespace user_client
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (_agentProc == null || _agentProc.HasExited) return;
-            _agentProc.Kill();
+            KillAgent();
         }
 
-        private void StartAgent(string empId)
+        private void KillAgent()
+        {
+            if (_agentProc == null) return;
+            _agentProc.Kill();
+            _agentProc.Close();
+            Console.WriteLine("Killed Agent");
+        }
+        private async Task StartAgentAsync(string empId)
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             ProcessStartInfo startInfo = new ProcessStartInfo
@@ -42,6 +55,92 @@ namespace user_client
                 UseShellExecute = false,
             };
             _agentProc = Process.Start(startInfo);
+            Console.WriteLine("Started Agent");
+
+            if (_conn != null && _channel != null && _conn.IsOpen && _channel.IsOpen) return;
+            ConnectRabbitServer();
+        }
+
+        private void ParseAdminMessage(string msg)
+        {
+            string[] msgs = msg.Split("<");
+            string policyType = msgs[0];
+            string toggle = msgs[1].Split(">")[0];
+
+            switch (policyType) {
+                case "AGENT":
+                    {
+                        if (toggle == "OFF")
+                        {
+                            KillAgent();
+                        } else if (toggle == "ON")
+                        {
+                            StartAgentAsync(_empId);
+                        }
+                        break;
+                    }     
+            }
+
+        }
+
+        private async Task ConnectRabbitServer()
+        {
+            if (_empId == null || string.IsNullOrEmpty(_empId)) return; 
+
+            string queueName = $"client_{_empId}";
+            string exchangeName = "tribosss";
+            string routingKey = "policy.set";
+            ConnectionFactory factory = new ConnectionFactory()
+            {
+                HostName = "localhost",
+                UserName = "guest",
+                Password = "guest",
+                ClientProvidedName = $"[{_empId}]"
+            };
+            _conn = await factory.CreateConnectionAsync();
+            _channel = await _conn.CreateChannelAsync();
+            await _channel.QueueDeclareAsync(
+                queueName,
+                durable: true,
+                exclusive: false,
+                autoDelete: false
+            );
+            await _channel.QueueBindAsync(
+                queueName,
+                exchangeName,
+                routingKey,
+                null
+            );
+            await _channel.ExchangeDeclareAsync(
+                exchangeName,
+                ExchangeType.Direct,
+                durable: true,
+                autoDelete: false,
+                arguments: null
+            );
+
+            AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(_channel);
+            consumer.ReceivedAsync += ReceivedMessageAtAdmin;
+
+            string consumerTag = await _channel.BasicConsumeAsync(
+                queue: queueName,
+                autoAck: false,
+                consumer: consumer
+            );
+        }
+
+        private async Task ReceivedMessageAtAdmin(object model, BasicDeliverEventArgs ea)
+        {
+            byte[] body = ea.Body.ToArray();
+            string msg = Encoding.UTF8.GetString(body);
+            Console.WriteLine($"Received: [{msg}]");
+
+            ParseAdminMessage(msg);
+
+            await _channel.BasicAckAsync(
+                deliveryTag: ea.DeliveryTag,
+                multiple: false
+            );
         }
 
         private void HandleGotoSignInControl()
@@ -69,14 +168,15 @@ namespace user_client
 
         private void SuccessSignIn(UserData uData)
         {
-            StartAgent(uData.Id);
+            _empId = uData.Id;
+            StartAgentAsync(uData.Id);
 
             PostListControl postListControl = new PostListControl();
-            postListControl.CreateEvent += HandleCreateEvent;
-            postListControl.SelectPostEvent += HandleSelectPost;
+            postListControl.CreateEvent += HandleNavigateCreatePost;
+            postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
             SideBarControl snb = new SideBarControl(uData);
-            snb.BoardNavigateEvt += HandlePostListControl;
+            snb.BoardNavigateEvt += HandleNavigatePostListControl;
             snb.PolicyRequestNavigateEvt += () => { };
             snb.ShowChatWindowEvt += HandleShowChatUserList;
 
@@ -92,32 +192,38 @@ namespace user_client
             window.Show();
         }
 
-        private void HandlePostListControl()
+        private void HandleNavigatePostListControl()
         {
-            PostListControl postListControl = new PostListControl();
-            postListControl.CreateEvent += HandleCreateEvent;
-            postListControl.SelectPostEvent += HandleSelectPost;
+            var postListControl = new PostListControl();
+
+            // 이벤트 연결
+            postListControl.CreateEvent += HandleNavigateCreatePost;
+            postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(postListControl);
         }
 
-        private void HandleCreateEvent()
+        private void HandleNavigateCreatePost(PostViewModel pvm)
         {
-            CreatePostControl createPostControl = new CreatePostControl();
-            createPostControl.PostCreated += newPost =>
-            {
-                RootGrid.Children.Clear();
-                RootGrid.Children.Add(new PostDetailControl(newPost));
-            };
+            CreatePostControl createPostControl = new CreatePostControl(pvm);
 
-            RootGrid.Children.Clear();
+            createPostControl.PostCreated += HandleNavigatePostDetail;
+
+            RootGrid.Children.RemoveAt(1);
+            RootGrid.Children.Add(createPostControl);
         }
 
-        private void HandleSelectPost(Post post)
+        private void HandleNavigatePostDetail(Post post, PostViewModel pvm)
         {
-            RootGrid.Children.Clear();
-            RootGrid.Children.Add(new PostDetailControl(post));
+            PostDetailControl control = new PostDetailControl(post, pvm);
+
+            control.NavigatePostList += HandleNavigatePostListControl;
+            control.NavigatePostDetail += HandleNavigatePostDetail;
+            control.NavigateCreatePost += HandleNavigateCreatePost;
+
+            RootGrid.Children.RemoveAt(1);
+            RootGrid.Children.Add(control);
         }
 
         private void InitTray()

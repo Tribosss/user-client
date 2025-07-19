@@ -9,6 +9,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="View\Auth\TotpControl.xaml.cs">
+    <Compile Update="ViewModel\RelayCommand.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="View\Chat\AddChatRoomWindow.xaml.cs">
