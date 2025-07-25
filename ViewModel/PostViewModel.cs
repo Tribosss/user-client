@@ -156,7 +156,7 @@ namespace user_client.ViewModel
                         AllPosts.Add(post);
                     }
                 }
-
+                // Body = bodyParagraphs,
                 CurrentPage = 1;
                 UpdatePostsForCurrentPage();
             }
