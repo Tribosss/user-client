@@ -109,7 +109,7 @@ namespace user_client.View
                     insertCmd.Parameters.AddWithValue("@body", post.Body);
                     insertCmd.Parameters.AddWithValue("@date", post.Date);
                     insertCmd.Parameters.AddWithValue("@author", post.Author);
-                    insertCmd.Parameters.AddWithValue("@Type", post.Type ?? "NORMAL");
+                    insertCmd.Parameters.AddWithValue("@Type", post.Type ?? "notice");
 
                     if (insertCmd.ExecuteNonQuery() == 1)
                         Console.WriteLine("Success Insert");
@@ -148,7 +148,7 @@ namespace user_client.View
 
                     updateCmd.Parameters.AddWithValue("@title", post.Title);
                     updateCmd.Parameters.AddWithValue("@body", post.Body);
-                    updateCmd.Parameters.AddWithValue("@Type", post.Type ?? "NORMAL");
+                    updateCmd.Parameters.AddWithValue("@Type", post.Type ?? "notice");
                     updateCmd.Parameters.AddWithValue("@id", post.Id); // 만약 ID 필드가 있다면 ID로 수정 필요
                     int rowsAffected = updateCmd.ExecuteNonQuery();
 
