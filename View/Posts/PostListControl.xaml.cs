@@ -61,17 +61,17 @@ namespace user_client.View
 
         private void PostList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            var dataGrid = sender as DataGrid;
-            if (dataGrid?.SelectedItem is Post selectedPost)
+            var listView = sender as System.Windows.Controls.ListView; // ✅ DataGrid → ListView로 수정
+            if (listView?.SelectedItem is Post selectedPost)
             {
-                // 선택된 게시글이 있으면 이벤트 호출
                 SelectPostEvent?.Invoke(selectedPost, _viewModel);
 
-                // ✅ 선택 상태 초기화 (같은 글을 다시 더블클릭할 수 있도록)
-                dataGrid.SelectedItem = null;
+                // ✅ 선택 상태 초기화
+                listView.SelectedItem = null;
                 _viewModel.SelectedPost = null;
             }
         }
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
