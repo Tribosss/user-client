@@ -138,7 +138,7 @@ namespace user_client.View
                 cmd.Parameters.AddWithValue("@id", empId);
                 cmd.Parameters.AddWithValue("@password", password);
 
-                Console.WriteLine($"[로그인 시도] 입력 ID: {empId}, PW: {password}");
+              
 
                 using MySqlDataReader rdr = cmd.ExecuteReader();
                 if (rdr.Read())
