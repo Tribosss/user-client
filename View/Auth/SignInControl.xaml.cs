@@ -15,7 +15,7 @@ namespace user_client.View
     {
         public event Action? GotoSignUpEvt;
         public event Action<UserData>? SuccessSignInEvt;
-        public event Action? RequireOtpEvt; 
+        public event Action<string, string>? RequireOtpEvt; // 로그인 실패 3회 시 사용자 정보 전달용 이벤트
 
         private int _failCount = 0;
 
@@ -51,11 +51,18 @@ namespace user_client.View
 
                 if (_failCount >= 3)
                 {
-                    RequireOtpEvt?.Invoke();
+                    string? email = GetEmailByUserId(loginId); // 사용자 이메일 조회
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        RequireOtpEvt?.Invoke(loginId, email); // OTP 인증 화면 전환 요청
+                    }
+                    else
+                    {
+                        System.Windows.MessageBox.Show("등록된 이메일이 없습니다.");
+                    }
 
                     return;
                 }
-
 
                 return;
             }
@@ -131,6 +138,8 @@ namespace user_client.View
                 cmd.Parameters.AddWithValue("@id", empId);
                 cmd.Parameters.AddWithValue("@password", password);
 
+                Console.WriteLine($"[로그인 시도] 입력 ID: {empId}, PW: {password}");
+
                 using MySqlDataReader rdr = cmd.ExecuteReader();
                 if (rdr.Read())
                 {
@@ -143,6 +152,46 @@ namespace user_client.View
                         Address = rdr[4].ToString(),
                         Age = int.Parse(rdr[5].ToString())
                     };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return null;
+        }
+
+        // 사용자 ID로 이메일 조회 (OTP 전송용)
+        private string? GetEmailByUserId(string userId)
+        {
+            string query = "SELECT email FROM employees WHERE id = @id";
+
+            try
+            {
+                Env.Load();
+
+                string? host = Environment.GetEnvironmentVariable("DB_HOST");
+                string? port = Environment.GetEnvironmentVariable("DB_PORT");
+                string? uid = Environment.GetEnvironmentVariable("DB_UID");
+                string? pwd = Environment.GetEnvironmentVariable("DB_PWD");
+                string? name = Environment.GetEnvironmentVariable("DB_NAME");
+
+                if (host == null || port == null || uid == null || pwd == null || name == null)
+                    throw new Exception("환경변수 누락");
+
+                string dbConnection = $"Server={host};Port={port};Database={name};Uid={uid};Pwd={pwd}";
+
+                using MySqlConnection connection = new MySqlConnection(dbConnection);
+                connection.Open();
+
+                using MySqlCommand cmd = new MySqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@id", userId);
+
+                using MySqlDataReader rdr = cmd.ExecuteReader();
+                if (rdr.Read())
+                {
+                    return rdr[0].ToString();
                 }
             }
             catch (Exception ex)

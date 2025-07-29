@@ -25,7 +25,7 @@ namespace user_client
         private IConnection _conn;
         private IChannel _channel;
         private string _empId;
-        
+
         public MainWindow()
         {
             InitializeComponent();
@@ -45,6 +45,7 @@ namespace user_client
             _agentProc.Close();
             Console.WriteLine("Killed Agent");
         }
+
         private async Task StartAgentAsync(string empId)
         {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -67,25 +68,26 @@ namespace user_client
             string policyType = msgs[0];
             string toggle = msgs[1].Split(">")[0];
 
-            switch (policyType) {
+            switch (policyType)
+            {
                 case "AGENT":
                     {
                         if (toggle == "OFF")
                         {
                             KillAgent();
-                        } else if (toggle == "ON")
+                        }
+                        else if (toggle == "ON")
                         {
                             StartAgentAsync(_empId);
                         }
                         break;
-                    }     
+                    }
             }
-
         }
 
         private async Task ConnectRabbitServer()
         {
-            if (_empId == null || string.IsNullOrEmpty(_empId)) return; 
+            if (_empId == null || string.IsNullOrEmpty(_empId)) return;
 
             string queueName = $"client_{_empId}";
             string exchangeName = "tribosss";
@@ -147,17 +149,19 @@ namespace user_client
         {
             RootGrid.Children.Clear();
             var signInControl = new SignInControl(SuccessSignIn, HandleGotoSignUpControl);
-            signInControl.RequireOtpEvt += HandleGotoOtpControl; // 로그인 3회 실패 시 이벤트 연결하는놈
+            signInControl.RequireOtpEvt += HandleGotoOtpControl; // 로그인 3회 실패 시 이벤트 연결
             RootGrid.Children.Add(signInControl);
         }
-        //otp화면으로 가는 메서드 추가
-        private void HandleGotoOtpControl()
+
+        // 로그인 실패 3회 시 OTP 인증 화면으로 이동하는 메서드
+        private void HandleGotoOtpControl(string userId, string email)
         {
             RootGrid.Children.Clear();
-            var otpControl = new TotpControl();
-            otpControl.OtpSuccessEvt += HandleGotoSignInControl; // 인증 성공 시 다시 로그인 화면으로 가는놈
+            var otpControl = new TotpControl(userId, email);
+            otpControl.OtpSuccessEvt += HandleGotoSignInControl;
             RootGrid.Children.Add(otpControl);
         }
+
         private void HandleGotoSignUpControl()
         {
             RootGrid.Children.Clear();
@@ -195,8 +199,6 @@ namespace user_client
         private void HandleNavigatePostListControl()
         {
             var postListControl = new PostListControl();
-
-            // 이벤트 연결
             postListControl.CreateEvent += HandleNavigateCreatePost;
             postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
@@ -207,7 +209,6 @@ namespace user_client
         private void HandleNavigateCreatePost(PostViewModel pvm)
         {
             CreatePostControl createPostControl = new CreatePostControl(pvm, _empId);
-
             createPostControl.PostCreated += HandleNavigatePostDetail;
 
             RootGrid.Children.RemoveAt(1);
@@ -217,7 +218,6 @@ namespace user_client
         private void HandleNavigatePostDetail(Post post, PostViewModel pvm)
         {
             PostDetailControl control = new PostDetailControl(post, pvm, _empId);
-
             control.NavigatePostList += HandleNavigatePostListControl;
             control.NavigatePostDetail += HandleNavigatePostDetail;
             control.NavigateCreatePost += HandleNavigateCreatePost;
@@ -226,10 +226,10 @@ namespace user_client
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(control);
         }
+
         private void HandleEditPost(Post post)
         {
             var createPostControl = new CreatePostControl(post, true);
-
             createPostControl.PostCreated += HandleNavigatePostDetail;
 
             RootGrid.Children.RemoveAt(1);
@@ -263,5 +263,3 @@ namespace user_client
         }
     }
 }
-
-
