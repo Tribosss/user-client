@@ -11,20 +11,147 @@
         <vm:PostViewModel />
     </UserControl.DataContext>
 
-    <Grid Margin="160 0 0 0">
-        <Frame Name="PostListFrame" Width="900"
-               NavigationUIVisibility="Hidden" />
-        <TextBlock Text="전체 글 보기" FontSize="20" FontWeight="Bold"
-                   Margin="50,40,0,0" />
-        <TextBlock FontSize="12" Margin="50,80,0,0">
-            <Run Text="{Binding TotalPostCount}" />
-            <Run Text="개의 글" />
-        </TextBlock>
+    <Grid Background="White" Margin="160 0 0 0" Name="MainContentGrid">
+        <Frame x:Name="PostListFrame"
+               NavigationUIVisibility="Hidden" 
+               Visibility="Collapsed"/>
+        <Grid x:Name="ListViewPanel" Visibility="Visible">
+            <TextBlock Text="전체 글 보기" FontSize="20" FontWeight="Bold"
+                       Margin="50,40,0,0" />
+            <TextBlock FontSize="12" Margin="50,80,0,0">
+                <Run Text="{Binding TotalPostCount}" />
+                <Run Text="개의 글" />
+            </TextBlock>
 
-        <Button Content="생성" HorizontalAlignment="Right" VerticalAlignment="Top" 
-                Width="50" Height="30" Margin="0,20,50,0" FontSize="12" Click="CreateButton_Click" />
 
-        <DataGrid 
+            <Button Content="생성" HorizontalAlignment="Right" VerticalAlignment="Top" 
+                    Width="50" Height="30" Margin="0,20,50,0" FontSize="12" Click="CreateButton_Click" />
+
+            <Grid Margin="30,110,30,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- 헤더 -->
+                    <RowDefinition Height="*"/>
+                    <!-- 리스트 영역 -->
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Height="1" Background="black" VerticalAlignment="Top" Margin="0,0,0,0"/>
+
+                <!-- 헤더 -->
+                <Grid Grid.Row="0" Height="30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="11*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Margin="5,0"/>
+                    <TextBlock Grid.Column="1" Text="제목" FontWeight="Bold" VerticalAlignment="Center" Margin="5,0" TextAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="작성자" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0" TextAlignment="Center"/>
+                    <TextBlock Grid.Column="3" Text="작성일" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0" TextAlignment="Center"/>
+                </Grid>
+
+                <!-- 리스트 -->
+                <ListView Grid.Row="1"
+                      ItemsSource="{Binding Posts}"
+                      SelectedItem="{Binding SelectedPost, Mode=TwoWay}"
+                      MouseDoubleClick="PostList_MouseDoubleClick"
+                      BorderThickness="0"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                    <ListView.Resources>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="MinHeight" Value="25"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="LightGray"/>
+                            <Setter Property="Padding" Value="5"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListViewItem">
+                                        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                                            <ContentPresenter />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.Resources>
+
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1.5*"/>
+                                    <ColumnDefinition Width="11*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0"
+                                    CornerRadius="5"
+                                    Padding="5,2"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    BorderThickness="1">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Type}" Value="notice">
+                                                    <Setter Property="Background" Value="#FFFFE5E5"/>
+                                                    <!-- 연한 빨강 -->
+                                                    <Setter Property="BorderBrush" Value="#FFFF8080"/>
+                                                    <!-- 빨강 테두리 -->
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Type}" Value="normal">
+                                                    <Setter Property="Background" Value="#FFE0E0E0"/>
+                                                    <!-- 연한 회색 -->
+                                                    <Setter Property="BorderBrush" Value="#FFB0B0B0"/>
+                                                    <!-- 회색 테두리 -->
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+
+                                    <TextBlock Text="{Binding Type}" FontWeight="Bold" FontSize="12" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="Black"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Type}" Value="notice">
+                                                        <Setter Property="Foreground" Value="#FFFF4040"/>
+                                                        <!-- 진한 빨강 -->
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Type}" Value="normal">
+                                                        <Setter Property="Foreground" Value="#FF606060"/>
+                                                        <!-- 진한 회색 -->
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="{Binding Title}" VerticalAlignment="Center" Margin="5,0" TextAlignment="Left"/>
+                                <TextBlock Grid.Column="2" Text="{Binding Author}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0" TextAlignment="Center"/>
+                                <TextBlock Grid.Column="3" Text="{Binding DateString}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0" TextAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
+                <Button Content="◀" Command="{Binding PreviousPageCommand}" Width="30" Click="PrevPage_Click"/>
+                <TextBlock Text="{Binding CurrentPage}" Margin="10,0" VerticalAlignment="Center"/>
+                <TextBlock Text="/" Margin="2,0"/>
+                <TextBlock Text="{Binding TotalPages}" Margin="2,0" VerticalAlignment="Center"/>
+                <Button Content="▶" Command="{Binding NextPageCommand}" Width="30" Click="NextPage_Click"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+    <!--<DataGrid 
             x:Name="PostList"
             ItemsSource="{Binding Posts}"
             SelectedItem="{Binding SelectedPost, Mode=TwoWay}"
@@ -67,7 +194,6 @@
             <TextBlock Text="/" Margin="2,0"/>
             <TextBlock Text="{Binding TotalPages}" Margin="2,0" VerticalAlignment="Center"/>
             <Button Content="▶" Command="{Binding NextPageCommand}" Width="30" Click="NextPage_Click"/>
-        </StackPanel>
-    </Grid>
+        </StackPanel>-->
 
 </UserControl>

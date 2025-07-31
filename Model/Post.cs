@@ -9,5 +9,6 @@
         public string Author { get; set; }
         public string Body { get; set; }
         public DateTime Date { get; set; }
+        public string DateString => Date.ToString("yyyy-MM-dd");
     }
 }
