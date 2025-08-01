@@ -1,11 +1,15 @@
 ﻿using DotNetEnv;
 using MySql.Data.MySqlClient;
 using PacketDotNet;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using SharpPcap;
 using SharpPcap.LibPcap;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Principal;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using user_client.Components;
@@ -13,9 +17,6 @@ using user_client.Model;
 using user_client.View;
 using user_client.View.Chat;
 using user_client.ViewModel;
-using RabbitMQ.Client;
-using System.Threading.Tasks;
-using RabbitMQ.Client.Events;
 
 namespace user_client
 {
@@ -25,6 +26,7 @@ namespace user_client
         private IConnection _conn;
         private IChannel _channel;
         private string _empId;
+        private BlockSiteClient _blockCli;
 
         public MainWindow()
         {
@@ -58,6 +60,8 @@ namespace user_client
             _agentProc = Process.Start(startInfo);
             Console.WriteLine("Started Agent");
 
+            _blockCli = new BlockSiteClient();
+
             if (_conn != null && _channel != null && _conn.IsOpen && _channel.IsOpen) return;
             ConnectRabbitServer();
         }
@@ -79,6 +83,22 @@ namespace user_client
                         else if (toggle == "ON")
                         {
                             StartAgentAsync(_empId);
+                        }
+                        break;
+                    }
+                case "BLOCK":
+                    {
+                        int start1 = msg.IndexOf('<') + 1;
+                        int end1 = msg.IndexOf('>', start1);
+                        int start2 = msg.IndexOf('<', end1) + 1;
+                        int end2 = msg.IndexOf('>', start2);
+                        string domain = msg.Substring(start2, end2 - start2);
+                        if (toggle == "OFF")
+                        {
+                            _blockCli.RemoveDomain(domain);
+                        } else if (toggle == "ON")
+                        {
+                            _blockCli.BlockDomain(domain);
                         }
                         break;
                     }
@@ -226,6 +246,7 @@ namespace user_client
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(control);
         }
+
 
         private void HandleEditPost(Post post)
         {
