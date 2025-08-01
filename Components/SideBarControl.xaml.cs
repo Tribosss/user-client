@@ -25,6 +25,8 @@ namespace user_client.Components
         {
             InitializeComponent();
             _userData = userData;
+
+            EmpId.Text = $"사번: {_userData.Id}";
         }
 
 

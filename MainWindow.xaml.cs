@@ -23,14 +23,14 @@ namespace user_client
     {
         private AgentClient agcli;
         private RabbitClient rbcli;
-        
+       
         public MainWindow()
         {
             InitializeComponent();
             InitTray();
-
             HandleGotoSignInControl();
         }
+
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
             agcli.KillAgent();
@@ -39,11 +39,20 @@ namespace user_client
         private void HandleGotoSignInControl()
         {
             RootGrid.Children.Clear();
-            SignInControl control = new SignInControl();
-            control.GotoSignUpEvt += HandleGotoSignUpControl;
-            control.SuccessSignInEvt += SuccessSignIn;
-            RootGrid.Children.Add(control);
+            var signInControl = new SignInControl(SuccessSignIn, HandleGotoSignUpControl);
+            signInControl.RequireOtpEvt += HandleGotoOtpControl; // 로그인 3회 실패 시 이벤트 연결
+            RootGrid.Children.Add(signInControl);
         }
+
+        // 로그인 실패 3회 시 OTP 인증 화면으로 이동하는 메서드
+        private void HandleGotoOtpControl(string userId, string email)
+        {
+            RootGrid.Children.Clear();
+            var otpControl = new TotpControl(userId, email);
+            otpControl.OtpSuccessEvt += HandleGotoSignInControl;
+            RootGrid.Children.Add(otpControl);
+        }
+
         private void HandleGotoSignUpControl()
         {
             RootGrid.Children.Clear();
@@ -81,20 +90,16 @@ namespace user_client
         private void HandleNavigatePostListControl()
         {
             var postListControl = new PostListControl();
-
-            // 이벤트 연결
             postListControl.CreateEvent += HandleNavigateCreatePost;
             postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
-            // RootGrid에 추가
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(postListControl);
         }
 
         private void HandleNavigateCreatePost(PostViewModel pvm)
         {
-            CreatePostControl createPostControl = new CreatePostControl(pvm);
-
+            CreatePostControl createPostControl = new CreatePostControl(pvm, _empId);
             createPostControl.PostCreated += HandleNavigatePostDetail;
 
             RootGrid.Children.RemoveAt(1);
@@ -103,14 +108,23 @@ namespace user_client
 
         private void HandleNavigatePostDetail(Post post, PostViewModel pvm)
         {
-            PostDetailControl control = new PostDetailControl(post, pvm);
-
+            PostDetailControl control = new PostDetailControl(post, pvm, _empId);
             control.NavigatePostList += HandleNavigatePostListControl;
             control.NavigatePostDetail += HandleNavigatePostDetail;
             control.NavigateCreatePost += HandleNavigateCreatePost;
+            control.EditRequested += HandleEditPost;
 
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(control);
+        }
+
+        private void HandleEditPost(Post post)
+        {
+            var createPostControl = new CreatePostControl(post, true);
+            createPostControl.PostCreated += HandleNavigatePostDetail;
+
+            RootGrid.Children.RemoveAt(1);
+            RootGrid.Children.Add(createPostControl);
         }
 
         private void InitTray()

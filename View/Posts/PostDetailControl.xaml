@@ -3,74 +3,134 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:user_client.View"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="1060">
 
-    <Grid Margin="160 0 0 0" Background="LightGray">
+    <Grid Background="White" Margin="160,0,0,0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <!-- Scroll 영역 -->
+            <RowDefinition Height="Auto"/>
+            <!-- 댓글 입력창 -->
         </Grid.RowDefinitions>
 
-        <!-- 제목 + 작성자 + 버튼 -->
-        <Grid Grid.Row="0" Margin="30,30,30,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <!-- Scroll 영역 -->
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="7*"/>
+                    <!-- 게시글 본문 -->
+                    <RowDefinition Height="3*"/>
+                    <!-- 댓글 목록 -->
+                </Grid.RowDefinitions>
 
-            <!-- 제목 -->
-            <TextBlock x:Name="Title"
-                       Text="{Binding Post.Title}"
-                       FontSize="20"
-                       FontWeight="Bold"
-                       Foreground="Black"
-                       VerticalAlignment="Top"
-                       Margin="10"
-                       Background="White"
-                       Padding="10"/>
+                <!-- 게시글 본문 -->
+                <Border Grid.Row="0" Background="White" Padding="40" BorderBrush="#BFBFBF" BorderThickness="1" CornerRadius="4" Margin="40,30,40,10">
+                    <StackPanel>
+                        <!-- 제목 -->
+                        <TextBlock Text="{Binding Post.Title}" FontSize="26" FontWeight="Bold" Foreground="Black" Margin="0,0,0,20"/>
 
-            <!-- 작성자 + 버튼 + 날짜 -->
-            <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top">
-                <!-- 수정/삭제 버튼 -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="수정" Width="50" Height="30" Margin="0,0,5,0" Click="EditButton_Click"/>
-                    <Button Content="삭제" Width="50" Height="30" Click="DeleteButton_Click"/>
+                        <!-- 작성자 + 버튼 -->
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 작성자 -->
+                            <StackPanel Orientation="Horizontal" Grid.Column="0">
+                                <Ellipse Width="40" Height="40" Stroke="Gray" StrokeThickness="1" Margin="0,0,10,0">
+                                    <Ellipse.Fill>
+                                        <ImageBrush ImageSource="{Binding AuthorProfileImage}" />
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Post.Author}" FontSize="14" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding AuthorPosition}" FontSize="12" Foreground="Gray"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- 버튼 + 날짜 -->
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="EditButton" Content="수정" Width="50" Height="30" Margin="0,0,5,0" Click="EditButton_Click"/>
+                                    <Button x:Name="DeleteButton" Content="삭제" Width="50" Height="30" Click="DeleteButton_Click"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding Post.Date}" FontSize="12" Foreground="Gray" HorizontalAlignment="Right" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                        <!-- 구분선 -->
+                        <Separator Margin="0,0,0,20" Background="#BFBFBF" Height="1"/>
+                        <!-- 본문 -->
+                        <TextBlock Text="{Binding Post.Body}" FontSize="15" TextWrapping="Wrap" Foreground="Black" LineHeight="24"/>
+                    </StackPanel>
+                </Border>
+                <!-- 댓글 목록 -->
+                <StackPanel Grid.Row="1" Margin="40,10,40,30">
+                    <TextBlock x:Name="CommentCountText"
+                               Text="댓글 (0)"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Margin="10,0,0,5"/>
+                    <ItemsControl ItemsSource="{Binding Comments}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="0,0,0,1" BorderBrush="#E0E0E0" Padding="10" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- 좌측 상단: 작성자 -->
+                                        <TextBlock Text="{Binding Author}" 
+                                                   FontWeight="Bold" FontSize="14" 
+                                                   Grid.Row="0" Grid.Column="0"
+                                                   VerticalAlignment="Top" />
+                                        <!-- 우측 상단: 삭제 버튼 -->
+                                        <Button Content="삭제" Width="50" Height="24" 
+                                                Grid.Row="0" Grid.Column="1"
+                                                HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                Visibility="{Binding DeleteButtonVisibility}"
+                                                Click="DeleteComment_Click"/>
+                                        <!-- 좌측 하단: 내용 -->
+                                        <TextBlock Text="{Binding Content}" TextWrapping="Wrap" FontSize="13" 
+                                                   Grid.Row="1" Grid.Column="0"
+                                                   Margin="0,5,0,0" />
+                                        <!-- 우측 하단: 날짜 -->
+                                        <TextBlock Text="{Binding Date}" FontSize="11" Foreground="Gray"
+                                                   Grid.Row="1" Grid.Column="1"
+                                                   HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
-
-                <!-- 날짜 -->
-                <TextBlock x:Name="Date"
-                           Text="{Binding Post.Date}"
-                           FontSize="12"
-                           Foreground="Gray"
-                           HorizontalAlignment="Right"
-                           Margin="0,5,0,0"/>
-            </StackPanel>
-
-            <!-- 작성자 프로필 (제목 아래 왼쪽) -->
-            <StackPanel Orientation="Horizontal" Margin="10,60,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2">
-                <Ellipse Width="40" Height="40" Stroke="Gray" StrokeThickness="1" Margin="0,0,10,0">
-                    <Ellipse.Fill>
-                        <ImageBrush ImageSource="{Binding AuthorProfileImage}" />
-                    </Ellipse.Fill>
-                </Ellipse>
-                <StackPanel>
-                    <TextBlock Text="{Binding Post.Author}" FontWeight="Bold" FontSize="14" Foreground="Black"/>
-                    <TextBlock Text="{Binding AuthorPosition}" FontSize="12" Foreground="Gray"/>
-                </StackPanel>
-            </StackPanel>
-        </Grid>
-
-        <!-- 본문 -->
-        <ScrollViewer Grid.Row="1" Margin="30,20,30,30" VerticalScrollBarVisibility="Auto">
-            <Border Background="White" Padding="20">
-                <TextBlock x:Name="Body"
-                           Text="{Binding Post.Body}"
-                           FontSize="15"
-                           TextWrapping="Wrap"
-                           Foreground="Black"/>
-            </Border>
+            </Grid>
         </ScrollViewer>
+
+        <!-- 댓글 입력창: 화면 하단 고정 -->
+        <Border Grid.Row="1" Background="White" Padding="20" BorderThickness="1,1,0,0" BorderBrush="#DADADA">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <!-- TextBox -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Button -->
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="CommentInput"
+                         Grid.Column="0"
+                         Height="40"
+                         Margin="0,0,10,0"
+                         VerticalContentAlignment="Center"
+                         FontSize="14"/>
+                <Button Content="등록" Grid.Column="1" Width="80" Height="40" Click="AddComment_Click"/>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>
