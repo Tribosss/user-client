@@ -1,11 +1,15 @@
 ﻿using DotNetEnv;
 using MySql.Data.MySqlClient;
 using PacketDotNet;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using SharpPcap;
 using SharpPcap.LibPcap;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Principal;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using user_client.Components;
@@ -13,9 +17,6 @@ using user_client.Model;
 using user_client.View;
 using user_client.View.Chat;
 using user_client.ViewModel;
-using RabbitMQ.Client;
-using System.Threading.Tasks;
-using RabbitMQ.Client.Events;
 
 namespace user_client
 {
@@ -23,7 +24,6 @@ namespace user_client
     {
         private AgentClient agcli;
         private RabbitClient rbcli;
-       
         public MainWindow()
         {
             InitializeComponent();
@@ -117,6 +117,7 @@ namespace user_client
             RootGrid.Children.RemoveAt(1);
             RootGrid.Children.Add(control);
         }
+
 
         private void HandleEditPost(Post post)
         {
