@@ -17,7 +17,7 @@ namespace user_client.Components
     {
         const string hostsPath = @"C:\Windows\System32\drivers\etc\hosts";
         
-        public void ReadBlockedDomain()
+        public bool IsExistDomain(string domain)
         {
             try
             {
@@ -30,6 +30,8 @@ namespace user_client.Components
                     if (line == null) break;
                     if (line[0] == '#') continue;
                     Console.WriteLine(line);
+
+                    if (line.Contains(domain)) return true;
                 }
                 Console.WriteLine("Stop Read File");
                 sr.Close();
@@ -38,16 +40,19 @@ namespace user_client.Components
             {
                 Console.WriteLine("Exception: " + e.Message);
             }
+            return false;
         }
 
         public void BlockDomain(string domain)
         {
             try
             {
-                StreamWriter sw = new StreamWriter(hostsPath);
-                sw.WriteLine($"127.0.0.1 {domain}");
-                sw.WriteLine($"127.0.0.1 www.{domain}");
-                sw.Close();
+                using (StreamWriter sw = new StreamWriter(hostsPath, true, Encoding.UTF8, 4096))
+                {
+                    sw.WriteLine($"127.0.0.1 {domain}");
+                    sw.WriteLine($"127.0.0.1 www.{domain}");
+                }
+                Console.WriteLine($"BlockDomain: Success ({domain})");
             }
             catch (Exception e)
             {
@@ -72,8 +77,11 @@ namespace user_client.Components
         }
         public void ClearDomain()
         {
-            FileStream fs = new FileStream(hostsPath, FileMode.Open);
-            fs.SetLength(0);
+            using (FileStream fs = new FileStream(hostsPath, FileMode.Open, FileAccess.Write, FileShare.ReadWrite))
+            {
+                fs.SetLength(0);
+            }
+            Console.WriteLine("ClearDomain: Success");
         }
     }
 }

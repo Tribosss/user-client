@@ -24,6 +24,7 @@ namespace user_client
     {
         private AgentClient agcli;
         private RabbitClient rbcli;
+        private string _empId;
         public MainWindow()
         {
             InitializeComponent();
@@ -65,6 +66,7 @@ namespace user_client
         {
             rbcli = new RabbitClient(uData.Id);
             rbcli.StartAgent(uData.Id);
+            _empId = uData.Id;
 
             PostListControl postListControl = new PostListControl();
             postListControl.CreateEvent += HandleNavigateCreatePost;
