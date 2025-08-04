@@ -22,6 +22,7 @@
   </Content>
 </ItemGroup>
 <ItemGroup>
+  <None Remove="Fonts\RaviPrakash-Regular.ttf" />
   <None Remove="Src\Icon\BoardIcon.png" />
   <None Remove="Src\Icon\ChatIcon.png" />
   <None Remove="Src\Icon\CreateUserChatIcon.png" />
@@ -51,6 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Fonts\RaviPrakash-Regular.ttf" />
     <Resource Include="Src\Icon\BoardIcon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

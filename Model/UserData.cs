@@ -17,5 +17,6 @@ namespace user_client.Model
         public int Age { get; set; }
         public string Salt { get; set; }
         public string CreatedAt { get; set; }
+        public string Email { get; set; }   // 추가(OTP->메인화면 때 사용)
     }
 }

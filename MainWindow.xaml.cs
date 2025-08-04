@@ -24,53 +24,79 @@ namespace user_client
     {
         private AgentClient agcli;
         private RabbitClient rbcli;
+
+        // 현재 로그인한 사용자
+        private UserData _currentUser;
+
         public MainWindow()
         {
             InitializeComponent();
             InitTray();
             HandleGotoSignInControl();
+
+            this.Closing += MainWindow_Closing;
         }
 
         private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
         {
-            agcli.KillAgent();
+            // 안전하게 종료
+            if (agcli != null)
+            {
+                agcli.KillAgent();
+            }
         }
 
+        // 로그인 화면으로 이동
         private void HandleGotoSignInControl()
         {
             RootGrid.Children.Clear();
             var signInControl = new SignInControl(SuccessSignIn, HandleGotoSignUpControl);
-            signInControl.RequireOtpEvt += HandleGotoOtpControl; // 로그인 3회 실패 시 이벤트 연결
+            signInControl.RequireOtpEvt += HandleGotoOtpControl; // 로그인 3회 실패 시 OTP
             RootGrid.Children.Add(signInControl);
         }
 
-        // 로그인 실패 3회 시 OTP 인증 화면으로 이동하는 메서드
+        // 로그인 실패 3회 시 OTP 화면으로 이동
         private void HandleGotoOtpControl(string userId, string email)
         {
             RootGrid.Children.Clear();
             var otpControl = new TotpControl(userId, email);
-            otpControl.OtpSuccessEvt += HandleGotoSignInControl;
+
+            // OTP 인증 성공 시 메인화면으로 이동
+            otpControl.OtpSuccessEvt += (userData) =>
+            {
+                SuccessSignIn(userData);
+            };
+
             RootGrid.Children.Add(otpControl);
         }
 
+        // 회원가입 화면으로 이동
         private void HandleGotoSignUpControl()
         {
             RootGrid.Children.Clear();
-            SignUpControl control = new SignUpControl();
+            var control = new SignUpControl();
             control.GotoSignInEvt += HandleGotoSignInControl;
             RootGrid.Children.Add(control);
         }
 
+        // 로그인 성공 시 메인 화면 초기화
         private void SuccessSignIn(UserData uData)
         {
+            _currentUser = uData;
+
+            // RabbitMQ 클라이언트 초기화
             rbcli = new RabbitClient(uData.Id);
             rbcli.StartAgent(uData.Id);
 
-            PostListControl postListControl = new PostListControl();
+            // AgentClient 생성
+            agcli = new AgentClient();
+
+            // 사이드바 & 포스트 리스트 로드
+            var postListControl = new PostListControl();
             postListControl.CreateEvent += HandleNavigateCreatePost;
             postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
-            SideBarControl snb = new SideBarControl(uData);
+            var snb = new SideBarControl(uData);
             snb.BoardNavigateEvt += HandleNavigatePostListControl;
             snb.PolicyRequestNavigateEvt += () => { };
             snb.ShowChatWindowEvt += HandleShowChatUserList;
@@ -80,63 +106,83 @@ namespace user_client
             RootGrid.Children.Add(postListControl);
         }
 
+        // 채팅 유저 목록 창 표시
         private void HandleShowChatUserList(string empId)
         {
-            ChatUserListWindow window = new ChatUserListWindow(empId);
-            window.Owner = this;
+            var window = new ChatUserListWindow(empId)
+            {
+                Owner = this
+            };
             window.Show();
         }
 
+        // 게시판 목록 화면으로 이동
         private void HandleNavigatePostListControl()
         {
             var postListControl = new PostListControl();
             postListControl.CreateEvent += HandleNavigateCreatePost;
             postListControl.SelectPostEvent += HandleNavigatePostDetail;
 
-            RootGrid.Children.RemoveAt(1);
+            if (RootGrid.Children.Count > 1)
+            {
+                RootGrid.Children.RemoveAt(1);
+            }
             RootGrid.Children.Add(postListControl);
         }
 
+        // 게시글 작성 화면으로 이동
         private void HandleNavigateCreatePost(PostViewModel pvm)
         {
-            CreatePostControl createPostControl = new CreatePostControl(pvm, _empId);
+            var createPostControl = new CreatePostControl(pvm, _currentUser.Id);
             createPostControl.PostCreated += HandleNavigatePostDetail;
 
-            RootGrid.Children.RemoveAt(1);
+            if (RootGrid.Children.Count > 1)
+            {
+                RootGrid.Children.RemoveAt(1);
+            }
             RootGrid.Children.Add(createPostControl);
         }
 
+        // 게시글 상세 화면으로 이동
         private void HandleNavigatePostDetail(Post post, PostViewModel pvm)
         {
-            PostDetailControl control = new PostDetailControl(post, pvm, _empId);
+            var control = new PostDetailControl(post, pvm, _currentUser.Id);
             control.NavigatePostList += HandleNavigatePostListControl;
             control.NavigatePostDetail += HandleNavigatePostDetail;
             control.NavigateCreatePost += HandleNavigateCreatePost;
             control.EditRequested += HandleEditPost;
 
-            RootGrid.Children.RemoveAt(1);
+            if (RootGrid.Children.Count > 1)
+            {
+                RootGrid.Children.RemoveAt(1);
+            }
             RootGrid.Children.Add(control);
         }
 
-
+        // 게시글 수정 화면으로 이동
         private void HandleEditPost(Post post)
         {
             var createPostControl = new CreatePostControl(post, true);
             createPostControl.PostCreated += HandleNavigatePostDetail;
 
-            RootGrid.Children.RemoveAt(1);
+            if (RootGrid.Children.Count > 1)
+            {
+                RootGrid.Children.RemoveAt(1);
+            }
             RootGrid.Children.Add(createPostControl);
         }
 
+        // 트레이 아이콘 초기화
         private void InitTray()
         {
-            // 트레이 초기 설정
-            NotifyIcon tray = new NotifyIcon();
-            tray.Icon = Properties.Resources.TribTrayIcon;
-            tray.Visible = true;
-            tray.Text = "Tribosss";
+            NotifyIcon tray = new NotifyIcon
+            {
+                Icon = Properties.Resources.TribTrayIcon,
+                Visible = true,
+                Text = "Tribosss"
+            };
 
-            // 최소화 시 작업표시줄 숨김 & 트레이 표시
+            // 최소화 시 트레이로 이동
             this.StateChanged += (s, e) =>
             {
                 if (this.WindowState != WindowState.Minimized) return;
@@ -144,7 +190,7 @@ namespace user_client
                 this.ShowInTaskbar = false;
             };
 
-            // 트레이 더블클릭 시 작업표시줄 표시 & 트레이 숨김
+            // 트레이 더블클릭 시 복원
             tray.DoubleClick += delegate
             {
                 this.Show();
