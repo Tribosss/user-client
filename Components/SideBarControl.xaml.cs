@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sprache;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,6 +27,7 @@ namespace user_client.Components
             InitializeComponent();
             _userData = userData;
 
+            Position.Text = $"직급: {_userData.Position}";
             EmpId.Text = $"사번: {_userData.Id}";
         }
 

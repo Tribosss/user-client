@@ -22,7 +22,7 @@ namespace user_client.View
             _vm = vm;
             _currentUserId = currentUserId;
         }
-        public CreatePostControl(Post postToEdit, bool isEditMode)
+        public CreatePostControl(Post postToEdit, bool isEditMode, string currentUserId)
         {
             InitializeComponent();
 
@@ -41,6 +41,7 @@ namespace user_client.View
                     Date = postToEdit.Date,
                     Type = postToEdit.Type
                 };
+                _currentUserId = currentUserId;
                 _originalTitle = postToEdit.Title;
 
                 // 텍스트박스에 복사본 내용 표시

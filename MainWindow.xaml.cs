@@ -24,6 +24,7 @@ namespace user_client
     {
         private AgentClient agcli;
         private RabbitClient rbcli;
+        private string _empId;
         public MainWindow()
         {
             InitializeComponent();
@@ -63,6 +64,7 @@ namespace user_client
 
         private void SuccessSignIn(UserData uData)
         {
+             _empId = uData.Id;
             rbcli = new RabbitClient(uData.Id);
             rbcli.StartAgent(uData.Id);
 
@@ -121,7 +123,7 @@ namespace user_client
 
         private void HandleEditPost(Post post)
         {
-            var createPostControl = new CreatePostControl(post, true);
+            var createPostControl = new CreatePostControl(post, true, _empId);
             createPostControl.PostCreated += HandleNavigatePostDetail;
 
             RootGrid.Children.RemoveAt(1);
