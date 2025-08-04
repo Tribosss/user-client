@@ -111,7 +111,7 @@ namespace user_client.View
 
         private UserData? GetUserData(string empId, string password)
         {
-            string query = "select e.id, e.name, r.position, e.phone, e.address, e.age " +
+            string query = "select e.id, e.name, r.position, e.phone, e.address, e.age, e.role_id " +
                            "from employees e " +
                            "inner join role r on r.id = e.role_id " +
                            "where e.id = @id and e.password = @password;";
@@ -141,16 +141,21 @@ namespace user_client.View
                 using MySqlDataReader rdr = cmd.ExecuteReader();
                 if (rdr.Read())
                 {
+                    int roleId = Convert.ToInt32(rdr[6]);
+                    Console.WriteLine($"roleId from DB: {roleId}");
+                    string positionText = roleId == 1 ? "관리자" : "사원";
+
                     return new UserData
                     {
                         Id = rdr[0].ToString(),
                         Name = rdr[1].ToString(),
-                        Position = rdr[2].ToString() == "ADMIN" ? "관리자" : "사원",
+                        Position = positionText,
                         Phone = rdr[3].ToString(),
                         Address = rdr[4].ToString(),
                         Age = int.Parse(rdr[5].ToString())
                     };
                 }
+
             }
             catch (Exception ex)
             {
