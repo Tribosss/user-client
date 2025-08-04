@@ -67,6 +67,7 @@ namespace user_client
              _empId = uData.Id;
             rbcli = new RabbitClient(uData.Id);
             rbcli.StartAgent(uData.Id);
+            _empId = uData.Id;
 
             PostListControl postListControl = new PostListControl();
             postListControl.CreateEvent += HandleNavigateCreatePost;
