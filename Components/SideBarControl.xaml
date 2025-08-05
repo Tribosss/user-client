@@ -61,18 +61,6 @@
                         <TextBlock Grid.Column="1" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">채팅</TextBlock>
                     </Grid>
                 </Button>
-
-                <!-- 권한 요청 버튼 -->
-                <Button Grid.Row="2" Click="PolicyRequestNav_Click" Background="#D9D9D9" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Center">
-                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="80">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="30" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Margin="-3 0 0 0" Source="/Src/Icon/PolicyRequestIcon.png" Width="30" Height="30"/>
-                        <TextBlock Grid.Column="1" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Center">권한 요청</TextBlock>
-                    </Grid>
-                </Button>
             </Grid>
 
             <!-- 사용자 정보 -->
