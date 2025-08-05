@@ -68,6 +68,18 @@ namespace user_client.View
             TimeLeftText.Text = $"남은 시간: {Math.Max(0, remaining)}초";
         }
 
+        private void OtpBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            OtpPlaceHolder.Visibility = Visibility.Collapsed;
+        }
+
+        private void OtpBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(OtpBox.Text))
+            {
+                OtpPlaceHolder.Visibility = Visibility.Visible;
+            }
+        }
         private void OtpButton_Click(object sender, RoutedEventArgs e)
         {
             string inputCode = OtpBox.Text.Trim();
@@ -78,7 +90,7 @@ namespace user_client.View
                 OtpErrorText.Visibility = Visibility.Collapsed;
                 _timer.Stop(); // 타이머 중지
 
-                // ✅ 로그인 성공 시 DB에서 사용자 정보 로드 후 메인 화면으로 전환
+                // 로그인 성공 시 DB에서 사용자 정보 로드 후 메인 화면으로 전환
                 UserData userData = LoadUserData(_userId);
                 OtpSuccessEvt?.Invoke(userData);
             }
