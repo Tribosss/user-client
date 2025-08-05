@@ -58,8 +58,22 @@ namespace user_client.View
         public PostViewModel _vm;
         private Post _post;
         private string _currentUserId;
+        private int _currentUserRoleId = 0;
         public event Action<Post> EditRequested;
         public ObservableCollection<Comment> Comments { get; set; } = new ObservableCollection<Comment>();
+        private string _authorPosition;
+        public string AuthorPosition
+        {
+            get => _authorPosition;
+            set
+            {
+                if (_authorPosition != value)
+                {
+                    _authorPosition = value;
+                    OnPropertyChanged(nameof(AuthorPosition));
+                }
+            }
+        }
 
         public Post Post
         {
@@ -80,6 +94,8 @@ namespace user_client.View
             _vm = vm;
             _post = post;
             _currentUserId = currentUserId;
+            _currentUserRoleId = GetUserRoleId(_currentUserId);
+            AuthorPosition = GetAuthorPosition(_post.Author);
             this.DataContext = this;
 
             SetButtonVisibility();
@@ -88,6 +104,84 @@ namespace user_client.View
         private void UpdateCommentCount()
         {
             CommentCountText.Text = $"댓글 ({Comments.Count})";
+        }
+        private string GetAuthorPosition(string authorId)
+        {
+            string position = "";
+
+            try
+            {
+                Env.Load();
+                string connStr = $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" +
+                                 $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
+                                 $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                                 $"Uid={Environment.GetEnvironmentVariable("DB_UID")};" +
+                                 $"Pwd={Environment.GetEnvironmentVariable("DB_PWD")}";
+
+                using (var conn = new MySqlConnection(connStr))
+                {
+                    conn.Open();
+                    string query = @"SELECT r.position FROM employees e JOIN role r ON e.role_id = r.id WHERE e.id = @id LIMIT 1";
+
+                    using (var cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", authorId);
+                        var result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            string positionValue = result.ToString();
+
+                            return positionValue switch
+                            {
+                                "ADMIN" => "관리자",
+                                "STAFF" => "사원",
+                                _ => "직급 정보 없음"
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("직급 정보 조회 오류: " + ex.Message);
+            }
+
+            return position;
+        }
+
+        private int GetUserRoleId(string userId)
+        {
+            int roleId = 0;
+            try
+            {
+                Env.Load();
+                string connStr = $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" +
+                                 $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
+                                 $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                                 $"Uid={Environment.GetEnvironmentVariable("DB_UID")};" +
+                                 $"Pwd={Environment.GetEnvironmentVariable("DB_PWD")}";
+
+                using (var conn = new MySqlConnection(connStr))
+                {
+                    conn.Open();
+
+                    string query = "SELECT role_id FROM employees WHERE id = @userId LIMIT 1";
+                    using (var cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@userId", userId);
+                        var result = cmd.ExecuteScalar();
+                        if (result != null && int.TryParse(result.ToString(), out int rid))
+                        {
+                            roleId = rid;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("사용자 권한 조회 오류: " + ex.Message);
+            }
+            return roleId;
         }
 
         private void AddComment_Click(object sender, RoutedEventArgs e)
@@ -191,15 +285,15 @@ namespace user_client.View
 
         private void SetButtonVisibility()
         {
-            if (_post.Author != _currentUserId)
-            {
-                EditButton.Visibility = Visibility.Collapsed;
-                DeleteButton.Visibility = Visibility.Collapsed;
-            }
-            else
+            if (_post.Author == _currentUserId || _currentUserRoleId == 1)
             {
                 EditButton.Visibility = Visibility.Visible;
                 DeleteButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                EditButton.Visibility = Visibility.Collapsed;
+                DeleteButton.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -246,10 +340,7 @@ namespace user_client.View
         }
         private void SetCommentDeleteButtonVisibility(Comment comment)
         {
-            // 현재 로그인한 사용자 _currentUserId
-            // 게시글 작성자 _post.Author
-
-            if (_currentUserId == _post.Author || _currentUserId == comment.Author)
+            if (_currentUserId == _post.Author || _currentUserId == comment.Author || _currentUserRoleId == 1)
             {
                 comment.DeleteButtonVisibility = Visibility.Visible;
             }
@@ -258,6 +349,7 @@ namespace user_client.View
                 comment.DeleteButtonVisibility = Visibility.Collapsed;
             }
         }
+
         private void LoadComments()
         {
             try
