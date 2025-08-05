@@ -160,7 +160,7 @@ namespace user_client
         // 게시글 수정 화면으로 이동
         private void HandleEditPost(Post post)
         {
-            var createPostControl = new CreatePostControl(post, true, _empId);
+            var createPostControl = new CreatePostControl(post, true, _currentUser.Id);
             createPostControl.PostCreated += HandleNavigatePostDetail;
 
             if (RootGrid.Children.Count > 1)
