@@ -14,7 +14,7 @@ namespace user_client.Model
         public string Phone { get; set; }
         public string Address { get; set; }
         public string Password { get; set; }
-        public int Age { get; set; }
+        public int? Age { get; set; }
         public string Salt { get; set; }
         public string CreatedAt { get; set; }
         public string Email { get; set; }   // 추가(OTP->메인화면 때 사용)

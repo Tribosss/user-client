@@ -65,7 +65,7 @@ namespace user_client.View
         private void UpdateRemainingTime(object? sender, EventArgs e)
         {
             int remaining = 180 - (int)(DateTime.UtcNow - _createdAt).TotalSeconds;
-            TimeLeftText.Text = $"남은 시간: {Math.Max(0, remaining)}초";
+            TimeLeftText.Text = $"{Math.Max(0, remaining)}초";
         }
 
         private void OtpBox_GotFocus(object sender, RoutedEventArgs e)
