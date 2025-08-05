@@ -11,7 +11,7 @@
         <vm:PostViewModel />
     </UserControl.DataContext>
 
-    <Grid Background="White" Margin="160 0 0 0" Name="MainContentGrid">
+    <Grid Margin="160 0 0 0" Name="MainContentGrid">
         <Frame x:Name="PostListFrame"
                NavigationUIVisibility="Hidden" 
                Visibility="Collapsed"/>
@@ -53,6 +53,7 @@
 
                 <!-- 리스트 -->
                 <ListView Grid.Row="1"
+                          Background="Transparent"
                       ItemsSource="{Binding Posts}"
                       SelectedItem="{Binding SelectedPost, Mode=TwoWay}"
                       MouseDoubleClick="PostList_MouseDoubleClick"

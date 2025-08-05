@@ -6,7 +6,7 @@
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="1060">
 
-    <Grid Background="White" Margin="160,0,0,0">
+    <Grid Margin="160,0,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <!-- Scroll 영역 -->
@@ -25,7 +25,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- 게시글 본문 -->
-                <Border Grid.Row="0" Background="White" Padding="40" BorderBrush="#BFBFBF" BorderThickness="1" CornerRadius="4" Margin="40,30,40,10">
+                <Border Grid.Row="0" Padding="40" BorderBrush="#BFBFBF" BorderThickness="1" CornerRadius="4" Margin="40,30,40,10">
                     <StackPanel>
                         <!-- 제목 -->
                         <TextBlock Text="{Binding Post.Title}" FontSize="26" FontWeight="Bold" Foreground="Black" Margin="0,0,0,20"/>
@@ -115,7 +115,7 @@
         </ScrollViewer>
 
         <!-- 댓글 입력창: 화면 하단 고정 -->
-        <Border Grid.Row="1" Background="White" Padding="20" BorderThickness="1,1,0,0" BorderBrush="#DADADA">
+        <Border Grid.Row="1" Padding="20" BorderThickness="1,1,0,0" BorderBrush="#DADADA">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -126,6 +126,7 @@
                 <TextBox x:Name="CommentInput"
                          Grid.Column="0"
                          Height="40"
+                         Background="#e1e1e1"
                          Margin="0,0,10,0"
                          VerticalContentAlignment="Center"
                          FontSize="14"/>
