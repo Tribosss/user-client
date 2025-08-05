@@ -98,7 +98,7 @@ namespace user_client.View
                 {
                     connection.Open();
 
-                    string selectQuery = "SELECT Id, Title, Body, created_at, Author, Type FROM posts ORDER BY created_at DESC;";
+                    string selectQuery = "SELECT Id, Title, Body, created_at, Author, Type FROM posts ORDER BY CASE WHEN type = 'notice' THEN 0 ELSE 1 END, created_at DESC;";
                     MySqlCommand selectCmd = new MySqlCommand(selectQuery, connection);
                     MySqlDataReader rdr = selectCmd.ExecuteReader();
 
