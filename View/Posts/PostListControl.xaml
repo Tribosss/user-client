@@ -143,57 +143,41 @@
                 </ListView>
             </Grid>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
-                <Button Content="◀" Command="{Binding PreviousPageCommand}" Width="30" Click="PrevPage_Click"/>
-                <TextBlock Text="{Binding CurrentPage}" Margin="10,0" VerticalAlignment="Center"/>
-                <TextBlock Text="/" Margin="2,0"/>
-                <TextBlock Text="{Binding TotalPages}" Margin="2,0" VerticalAlignment="Center"/>
-                <Button Content="▶" Command="{Binding NextPageCommand}" Width="30" Click="NextPage_Click"/>
+                <ItemsControl ItemsSource="{Binding PageNumbers}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding}" Margin="2"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Command="{Binding DataContext.ChangePageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                 CommandParameter="{Binding}">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                        <Setter Property="Foreground" Value="Black"/>
+                                        <Setter Property="Padding" Value="5,2"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FFE0E0E0"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background" Value="#FFC0C0C0"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </Grid>
     </Grid>
-    <!--<DataGrid 
-            x:Name="PostList"
-            ItemsSource="{Binding Posts}"
-            SelectedItem="{Binding SelectedPost, Mode=TwoWay}"
-            HorizontalAlignment="Stretch"
-            SelectionMode="Single"
-            AutoGenerateColumns="false"
-            CanUserAddRows="False"
-            Margin="50,110,50,30"
-            Background="White"
-            RowHeaderWidth="0"
-            MouseDoubleClick="PostList_MouseDoubleClick">
-            <DataGrid.CellStyle>
-                <Style TargetType="DataGridCell">
-                    <Setter Property="Padding" Value="3 2"/>
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type DataGridCell}">
-                                <Border 
-                                    Padding="{TemplateBinding Padding}"
-                                    Background="{TemplateBinding Background}"
-                                    SnapsToDevicePixels="True">
-                                    <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </DataGrid.CellStyle>
-
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Type}" Header="분류" IsReadOnly="True" Width="1*" />
-                <DataGridTextColumn Binding="{Binding Title}" Header="제목" IsReadOnly="True" Width="5*" />
-                <DataGridTextColumn Binding="{Binding Author}" Header="작성자" IsReadOnly="True" Width="2*" />
-                <DataGridTextColumn Binding="{Binding Date}" Header="작성일" IsReadOnly="True" Width="2*" />
-            </DataGrid.Columns>
-        </DataGrid>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
-            <Button Content="◀" Command="{Binding PreviousPageCommand}" Width="30" Click="PrevPage_Click"/>
-            <TextBlock Text="{Binding CurrentPage}" Margin="10,0" VerticalAlignment="Center"/>
-            <TextBlock Text="/" Margin="2,0"/>
-            <TextBlock Text="{Binding TotalPages}" Margin="2,0" VerticalAlignment="Center"/>
-            <Button Content="▶" Command="{Binding NextPageCommand}" Width="30" Click="NextPage_Click"/>
-        </StackPanel>-->
-
 </UserControl>

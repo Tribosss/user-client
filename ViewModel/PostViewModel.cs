@@ -9,6 +9,8 @@ using System.Windows.Input;
 using user_client.Model;
 using MySql.Data.MySqlClient;
 using DotNetEnv;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace user_client.ViewModel
 {
@@ -16,6 +18,7 @@ namespace user_client.ViewModel
     {
         public ObservableCollection<Post> AllPosts { get; set; } = new ObservableCollection<Post>();
         public ObservableCollection<Post> Posts { get; set; } = new ObservableCollection<Post>();
+        public ObservableCollection<int> PageNumbers { get; set; } = new ObservableCollection<int>();
         private int _totalPostCount;
         private int _currentPage = 1;
         private const int PageSize = 15;
@@ -53,15 +56,17 @@ namespace user_client.ViewModel
             {
                 Posts.Add(post);
             }
-
+            UpdatePageNumbers();
             OnPropertyChanged(nameof(Posts));
+            OnPropertyChanged(nameof(CurrentPage));
             OnPropertyChanged(nameof(TotalPages));
         }
         public void AddPost(Post post)
         {
             AllPosts.Insert(0, post);
             OnPropertyChanged(nameof(AllPosts));
-            CurrentPage = TotalPages;
+            TotalPostCount = AllPosts.Count;
+            CurrentPage = 1;
             UpdatePostsForCurrentPage();
         }
         private Post? _selectedPost;
@@ -77,28 +82,25 @@ namespace user_client.ViewModel
                 }
             }
         }
-        public ICommand NextPageCommand { get; }
-        public ICommand PreviousPageCommand { get; }
+        public ICommand ChangePageCommand { get; }
         public PostViewModel()
         {
-            NextPageCommand = new RelayCommand(_ => NextPage(), _ => CurrentPage < TotalPages);
-            PreviousPageCommand = new RelayCommand(_ => PreviousPage(), _ => CurrentPage > 1);
+            ChangePageCommand = new RelayCommand(ChangePage);
             LoadPosts();
         }
-        private void NextPage()
+        private void ChangePage(object? parameter)
         {
-            if (CurrentPage < TotalPages)
+            if (parameter is int page && page >= 1 && page <= TotalPages)
             {
-                CurrentPage++;
-                UpdatePostsForCurrentPage();
+                CurrentPage = page;
             }
         }
-        private void PreviousPage()
+        private void UpdatePageNumbers()
         {
-            if (CurrentPage > 1)
+            PageNumbers.Clear();
+            for (int i = 1; i <= TotalPages; i++)
             {
-                CurrentPage--;
-                UpdatePostsForCurrentPage();
+                PageNumbers.Add(i);
             }
         }
         private int GetTotalPostCount(MySqlConnection connection)
@@ -166,7 +168,7 @@ namespace user_client.ViewModel
             }
         }
         public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged(string name) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        private void OnPropertyChanged([CallerMemberName] string? name = null) =>
+           PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
