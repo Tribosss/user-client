@@ -44,7 +44,7 @@ namespace user_client.View.Chat
 
         private void AddChatRoomButton_Click(object sender, RoutedEventArgs e)
         {
-            AddChatRoomWindow chattingWindow = new AddChatRoomWindow(_currentEmpId, _cli);
+            AddChatRoomWindow chattingWindow = new AddChatRoomWindow(_currentEmpId, _cli, _cvm);
             chattingWindow.ShowDialog();
             _cvm.LoadChatUserList(_currentEmpId);
         }

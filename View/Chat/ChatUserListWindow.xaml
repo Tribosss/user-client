@@ -16,8 +16,23 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <TextBox Width="300" Margin="15 10 0 10" Background="Transparent"></TextBox>
             <Button Click="AddChatRoomButton_Click" BorderBrush="Transparent">
-                <Image Source="/Src/Icon/CreateUserChatIcon.png" Width="40" Margin="18 0 15 0"></Image>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="OverridesDefaultStyle" Value="True"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+                <Image Source="/Src/Icon/CreateUserChatIcon.png" Width="40" Margin="18 0 15 0"/>
             </Button>
+
         </StackPanel>
         <ItemsControl ItemsSource="{Binding RecentChattingUsers}" Grid.Row="1" Width="Auto" Height="Auto" Background="Transparent">
             

@@ -132,15 +132,14 @@
                            Visibility="Collapsed"
                            TextAlignment="Center"
                            
-                           Margin="0,16,0,0" Height="16" VerticalAlignment="Top"
+                           Margin="0 16 0 0" Height="16" VerticalAlignment="Top"
                            
                            />
                 </Grid>
 
-                <!-- 경고 메시지 -->
-
                 <!-- 가입 버튼 -->
                 <Button Content="가입 요청하기"
+                        Margin="0 -25 0 0 "
                         Width="308" Height="54"
                         Background="#D9D9D9"
                         BorderBrush="#8C8C8C"

@@ -14,13 +14,15 @@ namespace user_client.View.Chat
         public AddChatRoomViewModel _vm;
         public ChatClient _cli;
         private string _currentEmpId;
-        public AddChatRoomWindow(string empId, ChatClient cli)
+        private ChatUserListViewModel _cvm { get; set; }
+        public AddChatRoomWindow(string empId, ChatClient cli, ChatUserListViewModel cvm)
         {
             InitializeComponent();
             _vm = new AddChatRoomViewModel(empId);
             this.DataContext = _vm;
             _currentEmpId = empId;
             _cli = cli;
+            _cvm = cvm;
         }
 
         private void InviteUserButton_Click(object sender, RoutedEventArgs e)
@@ -55,6 +57,7 @@ namespace user_client.View.Chat
             window = new UserChattingWindow(users, _currentEmpId, _cli);
             window.Show();
             Close();
+            _cvm.LoadChatUserList(_currentEmpId);
         }
     }
 }
