@@ -83,7 +83,7 @@
                 <Image Source="/Src/Icon/Profile.png" Width="30" Height="30"/>
                 <StackPanel Orientation="Vertical">
                     <TextBlock Margin="6 5 0 0" FontSize="11" Name="EmpId">사번:</TextBlock>
-                    <TextBlock Margin="6 5 0 0" FontSize="11" Name="Position">직급: 관리자</TextBlock>
+                    <TextBlock Margin="6 5 0 0" FontSize="11" Name="Position">직급:</TextBlock>
                 </StackPanel>
             </StackPanel>
         </Grid>

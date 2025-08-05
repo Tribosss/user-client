@@ -83,8 +83,6 @@ namespace user_client
         private void SuccessSignIn(UserData uData)
         {
             _currentUser = uData;
-
-            // RabbitMQ 클라이언트 초기화
             rbcli = new RabbitClient(uData.Id);
             rbcli.StartAgent(uData.Id);
 
@@ -162,7 +160,7 @@ namespace user_client
         // 게시글 수정 화면으로 이동
         private void HandleEditPost(Post post)
         {
-            var createPostControl = new CreatePostControl(post, true);
+            var createPostControl = new CreatePostControl(post, true, _empId);
             createPostControl.PostCreated += HandleNavigatePostDetail;
 
             if (RootGrid.Children.Count > 1)

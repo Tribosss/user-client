@@ -18,11 +18,13 @@ namespace user_client.Components
         private IChannel _channel;
         private string _empId;
         private AgentClient _agcli;
+        private BlockSiteClient _bscli;
 
         public RabbitClient(string empId)
         {
             _empId = empId;
             _agcli = new AgentClient();
+            _bscli = new BlockSiteClient();
         }
 
         public void StartAgent(string empId)
@@ -37,19 +39,37 @@ namespace user_client.Components
         {
             string[] msgs = msg.Split("<");
             string policyType = msgs[0];
-            string toggle = msgs[1].Split(">")[0];
+            string data = msgs[1].Split(">")[0];
 
             switch (policyType)
             {
                 case "AGENT":
                     {
-                        if (toggle == "OFF")
+                        if (data == "OFF")
                         {
                             _agcli.KillAgent();
                         }
-                        else if (toggle == "ON")
+                        else if (data == "ON")
                         {
                             StartAgent(_empId);
+                        }
+                        break;
+                    }
+                case "DOMAIN":
+                    {
+                        if (data == "CLEAR")
+                        {
+                            _bscli.ClearDomain();
+                            break;
+                        }
+
+                        bool isExistDomain = _bscli.IsExistDomain(data);
+
+                        if (isExistDomain) {
+                            _bscli.RemoveDomain(data);
+                        } else
+                        {
+                            _bscli.BlockDomain(data);
                         }
                         break;
                     }
