@@ -66,21 +66,25 @@
 
                 <!-- 사번 입력 -->
                 <Grid Width="308" Height="54" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="45*"/>
+                        <ColumnDefinition Width="32*"/>
+                    </Grid.ColumnDefinitions>
                     <TextBox x:Name="SB"
                              Style="{StaticResource RoundedTextBox}"
                              FontSize="16"
+                             Padding="12,0,0,0"
                              VerticalContentAlignment="Center"
                              BorderBrush="#8C8C8C"
                              BorderThickness="1"
-                             Background="#E1E1E1" Margin="0,-43,0,43"/>
+                             Background="#E1E1E1" Margin="0,-27,0,27" Grid.ColumnSpan="2"/>
                     <!-- 플레이스홀더 -->
                     <TextBlock Text="사번을 입력하세요"
                                Foreground="#8C8C8C"
                                FontSize="16"
-                               Margin="10,-27,10,0"
-                               VerticalAlignment="Top"
+                               Margin="20,-11,0,44"
                                IsHitTestVisible="False"
-                               x:Name="SBPlaceholder"/>
+                               x:Name="SBPlaceholder" Grid.ColumnSpan="2"/>
                 </Grid>
 
                 <!-- 비밀번호 입력 -->
@@ -88,15 +92,16 @@
                     <PasswordBox x:Name="PW"
                                  Style="{StaticResource RoundedPasswordBox}"
                                  FontSize="16"
+                                 Padding="12,0,0,0"
                                  VerticalContentAlignment="Center"
                                  BorderBrush="#8C8C8C"
                                  BorderThickness="1"
-                                 Background="#E1E1E1" Margin="0,-56,0,56"/>
+                                 Background="#E1E1E1" Margin="0,-40,0,40"/>
                     <!-- 플레이스홀더 -->
                     <TextBlock Text="비밀번호를 입력하세요"
                                Foreground="#8C8C8C"
                                FontSize="16"
-                               Margin="10,-40,10,0"
+                               Margin="20,-24,0,0"
                                VerticalAlignment="Top"
                                IsHitTestVisible="False"
                                x:Name="PWPlaceholder"/>
@@ -107,15 +112,16 @@
                     <PasswordBox x:Name="PW2"
                                  Style="{StaticResource RoundedPasswordBox}"
                                  FontSize="16"
+                                 Padding="12,0,0,0"
                                  VerticalContentAlignment="Center"
                                  BorderBrush="#8C8C8C"
                                  BorderThickness="1"
-                                 Background="#E1E1E1" Margin="0,-67,0,67"/>
+                                 Background="#E1E1E1" Margin="0,-51,0,51"/>
                     <!-- 플레이스홀더 -->
                     <TextBlock Text="비밀번호를 다시 입력하세요"
                                Foreground="#8C8C8C"
                                FontSize="16"
-                               Margin="10,-51,10,0"
+                               Margin="20,-35,0,0"
                                VerticalAlignment="Top"
                                IsHitTestVisible="False"
                                x:Name="PW2Placeholder"/>
