@@ -20,15 +20,16 @@ namespace user_client.View.Chat
     {
         private string _currentEmpId;
         private ChatClient _cli { get; set; }
-        private ChatUserListViewModel _cvm { get; set; }    
+        private ChatUserListViewModel _cvm { get; set; }
         public ChatUserListWindow(string empId)
         {
             InitializeComponent();
-            _cli = new ChatClient();
+            _cli = new ChatClient(empId);
             _cli.Init();
             _cli.Connect(empId);
             _currentEmpId = empId;
-            _cvm = new ChatUserListViewModel(empId);
+            _cvm = new ChatUserListViewModel(empId, this.Dispatcher);
+            _cli.reloadChatList += _cvm.LoadChatUserList;
             this.DataContext = _cvm;
         }
 
