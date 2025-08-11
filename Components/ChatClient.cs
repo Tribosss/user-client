@@ -15,6 +15,12 @@ namespace user_client.Model
         ConcurrentBag<string> sendMessageListToView = null;
         ConcurrentBag<string> receiveMessageListToView = null;
         public event Action<string, string>? receiveMessageEvt;
+        public event Action<string>? reloadChatList;
+        private string _empId;
+        public ChatClient(string empId)
+        {
+            _empId = empId;
+        }
 
         public void Init()
         {
@@ -84,6 +90,7 @@ namespace user_client.Model
 
                     Console.WriteLine(string.Format($"[Arrived Message] {sender}: {msg}"));
                     receiveMessageEvt?.Invoke(sender, msg);
+                    reloadChatList?.Invoke(_empId);
                     receiveMessageListToView.Add(string.Format($"[{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}] Sender: {sender}, Message: {msg}"));
                 }
             }

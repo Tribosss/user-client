@@ -26,14 +26,14 @@ namespace user_client.View.Chat
         private string _roomId;
         private Dictionary<string, string> Users { get; } = new Dictionary<string, string>();
         public ObservableCollection<ChatLog> ChatLogs { get; } = new ObservableCollection<ChatLog>();
-        private ChatClient _cvm { get; set; }
-        public UserChattingWindow(ChatUserData recentChat, string empId, ChatClient cvm)
+        private ChatClient _ccli { get; set; }
+        public UserChattingWindow(ChatUserData recentChat, string empId, ChatClient ccli)
         {
             InitializeComponent();
             _roomId = recentChat.Id;
             TargetName.Text = recentChat.Name;
-            _cvm = cvm;
-            _cvm.receiveMessageEvt += HandleReceiveMessage;
+            _ccli = ccli;
+            _ccli.receiveMessageEvt += HandleReceiveMessage;
             this.DataContext = this;
             LoadChattingLogs(empId, recentChat.Id);
             ChatScroll.ScrollToEnd();
@@ -168,7 +168,7 @@ namespace user_client.View.Chat
         private void SendBtn_Click(object sender, RoutedEventArgs e)
         {
             string message = ChatInput.Text;
-            _cvm.SendMessage(message, _roomId);
+            _ccli.SendMessage(message, _roomId);
             Dispatcher.Invoke(() =>
             {
                 ChatLog log = new ChatLog()
