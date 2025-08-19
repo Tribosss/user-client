@@ -30,14 +30,17 @@ namespace user_client.View.Chat
         public UserChattingWindow(ChatUserData recentChat, string empId, ChatClient ccli)
         {
             InitializeComponent();
-            _roomId = recentChat.Id;
-            TargetName.Text = recentChat.Name;
+            if (recentChat != null)
+            { 
+                _roomId = recentChat.Id;
+                TargetName.Text = recentChat.Name;
+                LoadChattingLogs(empId, recentChat.Id);
+                LoadChatMembers(recentChat.Id);
+            } 
             _ccli = ccli;
             _ccli.receiveMessageEvt += HandleReceiveMessage;
             this.DataContext = this;
-            LoadChattingLogs(empId, recentChat.Id);
             ChatScroll.ScrollToEnd();
-            LoadChatMembers(recentChat.Id);
         }
 
         private void HandleReceiveMessage(string sender, string message)
