@@ -15,7 +15,8 @@ namespace user_client.ViewModel
 {
     public class AddChatRoomViewModel
     {
-        public ObservableCollection<UserData>? UserNameList { get; } = new ObservableCollection<UserData>();
+        public ObservableCollection<UserData>? StaffList { get; } = new ObservableCollection<UserData>();
+        public ObservableCollection<UserData>? AdminList { get; } = new ObservableCollection<UserData>();
         public ObservableCollection<UserData> SelectedUsers { get; } = new ObservableCollection<UserData>();
         public AddChatRoomViewModel(string empId) {
             LoadUserNames(empId);
@@ -63,9 +64,15 @@ namespace user_client.ViewModel
                         UserData uData = new UserData()
                         {
                             Id = rdr[0].ToString(),
-                            Name = $"{rdr[1].ToString()} [{rdr[2].ToString()}]",
+                            Name = $"{rdr[1].ToString()} [{rdr[0].ToString()}]",
                         };
-                        UserNameList.Add(uData);
+                        if (rdr[2].ToString() == "STAFF")
+                        {
+                            StaffList.Add(uData);
+                        } else
+                        {
+                            AdminList.Add(uData);
+                        }
                     }
 
                     connection.Close();

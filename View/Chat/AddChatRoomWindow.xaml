@@ -40,25 +40,56 @@
 
 
 
-        <ScrollViewer Grid.Row="1">
-            <ItemsControl ItemsSource="{Binding UserNameList}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Grid.Row="1" Width="250" Height="40" BorderBrush="#8c8c8c" BorderThickness="0 1 0 0">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="60" />
-                                </Grid.ColumnDefinitions>
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <ScrollViewer Grid.Row="0">
+                    <StackPanel>
+                    <TextBlock Margin="10 1" FontSize="14">관리자</TextBlock>
+                        <ItemsControl ItemsSource="{Binding AdminList}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Grid.Row="1" Width="250" Height="40" BorderBrush="#8c8c8c" BorderThickness="0 1 0 0">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="60" />
+                                            </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Margin="20 0 0 0"></TextBlock>
-                                <Button Click="InviteUserButton_Click" Grid.Column="1" Width="40" Height="25" FontSize="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0 -6 0 0" Margin="0 0 15 0">+</Button>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+                                            <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Margin="20 0 0 0"></TextBlock>
+                                            <Button Click="InviteUserButton_Click" Grid.Column="1" Width="40" Height="25" FontSize="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0 -6 0 0" Margin="0 0 15 0">+</Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+                <ScrollViewer Grid.Row="1">
+                <StackPanel>
+                    <TextBlock FontSize="14" Margin="10 1">사원</TextBlock>
+                    <ItemsControl ItemsSource="{Binding StaffList}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Grid.Row="1" Width="250" Height="40" BorderBrush="#8c8c8c" BorderThickness="0 1 0 0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="60" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}" VerticalAlignment="Center" Margin="20 0 0 0"></TextBlock>
+                                        <Button Click="InviteUserButton_Click" Grid.Column="1" Width="40" Height="25" FontSize="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Padding="0 -6 0 0" Margin="0 0 15 0">+</Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+                </ScrollViewer>
+        </Grid>
 
         <Button Click="AddChatRoomButton_Click"  Grid.Row="2" BorderBrush="#8c8c8c" BorderThickness="1" Width="100" Height="30" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 10 0">채팅방 만들기</Button>
     </Grid>
