@@ -21,20 +21,21 @@ namespace user_client.Components
         {
             try
             {
-                string line = "";
-                StreamReader sr = new StreamReader(hostsPath);
-                Console.WriteLine("Start Read File");
-                while (line != null)
+                using (var sr = new StreamReader(
+                    new FileStream(hostsPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
-                    line = sr.ReadLine();
-                    if (line == null) break;
-                    if (line[0] == '#') continue;
-                    Console.WriteLine(line);
+                    string line;
+                    Console.WriteLine("Start Read File");
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        if (string.IsNullOrWhiteSpace(line)) continue;
+                        if (line[0] == '#') continue;
+                        Console.WriteLine(line);
 
-                    if (line.Contains(domain)) return true;
+                        if (line.Contains(domain)) return true;
+                    }
                 }
                 Console.WriteLine("Stop Read File");
-                sr.Close();
             }
             catch (Exception e)
             {
